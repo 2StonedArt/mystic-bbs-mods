@@ -1,5 +1,12 @@
-[37m‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹                                         ‹‹‹‹‹‹  ‹‹‹     ‹‹‹‹‹‹‹ ‹‹‹‹‹‹‹ ‹‹‹‹‹‹‹                                         € ‹‹ €‹ € €     € ‹‹‹ € € ‹‹‹‹€ € €ﬂ ‹€                                         € ‹‹‹ € € €‹‹‹‹ € €‹€ € € €‹‹‹‹ € ‹ ﬂ€‹                                         €‹‹‹‹‹€[1C€‹‹‹‹‹€[1C€‹‹‹‹‹€[1C€‹‹‹‹‹€[1C€‹€€‹‹€[1C                                                ‹‹‹‹‹‹‹ ‹‹‹‹‹‹‹ ‹‹‹‹‹‹‹                                                         € ‹‹‹ € € ‹‹‹ € €‹‹ ‹‹€                                                         € ‹‹‹ € € ‹ ‹‹€   € €                                                           €‹€ €‹€[1C€‹€‹‹‹€[1C  €‹€[1Cv1.2A1                                        
-‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹                                         Another ANSI Editor for the Scene. With                                         BlockArt you can:                                                               ˛ Use Layers                                                                    ˛ Use TheDraw Fonts, alter them and                                               even create new ones                                                          ˛ 3 different text write styles                                                   [elite, case fx, fade fx]                                                     ˛ Draw lines, circles, save selection,                                            fill selection, draw 3d boxes etc.                                            ˛ Copy/Paste blocks                                                             ˛ Tools to make quick changes like                                                recoloring image, filling lines                                                 with char and more                                                            ˛ Import GameBoy and NES graphics from                                            ROM files                                                                     ˛ Insert Mystic Pipe Codes
-˛ Advanced TAB usage
-  [20C...and many more
-‹ linux 32b ver. ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
+        BlockArt 1.2A1                                      
+        Another ANSI Editor for the Scene. With BlockArt you can:
+        √æ Use Layers 
+        √æ Use TheDraw Fonts, alter them and even create new ones
+        √æ 3 different text write styles [elite, case fx, fade fx]
+        √æ Draw lines, circles, save selection, fill selection, draw 3d boxes etc.
+        √æ Copy/Paste blocks
+        √æ Tools to make quick changes like recoloring image, filling lines with char and more                                                        
+        √æ Import GameBoy and NES graphics from ROM files
+        √æ Insert Mystic Pipe Codes
+        √æ Advanced TAB usage
+        ...and many more
