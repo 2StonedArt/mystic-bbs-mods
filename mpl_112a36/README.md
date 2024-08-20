@@ -1,8 +1,4 @@
 Mystic Programing Language
-  ллллплпл лллллл лллл
-  лллл   л ллллмл лллл
-  лллл   л лллл   ллллмл
-         п
 MPL documentation for 1.12 A36
 this was originaly updated by Gryphon and it
 was at 1.10 A59. i have updated it to 1.12 A36
