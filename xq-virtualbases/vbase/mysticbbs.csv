@@ -1,0 +1,33 @@
+# name;type;acs[;target[;description]]
+
+# types      : file/link/group
+# acs        : 0-255
+# target     : if type is file, put the complete file path in here else
+#              put the complete URL for the link. The path supports variables.
+# description: if this field starts with a ! the description must contain
+               the full path for a .diz or .txt file containing the description
+               otherwise it will display the text entered.
+               Pipe commands are supported.
+
+Mystic 1.12 ;group;20
+mys112a43_l64.rar;link;20;http://www.mysticbbs.com/downloads/mys112a43_l64.rar;Linux 64 bit version
+mys112a43_l32.rar;link;20;http://www.mysticbbs.com/downloads/mys112a43_l32.rar
+mys112a43_w64.rar;link;20;http://www.mysticbbs.com/downloads/mys112a43_w64.rar;Windows 64 bit version
+mys112a43_w32.rar;link;20;http://www.mysticbbs.com/downloads/mys112a43_w32.rar;Windows 32 bit version
+
+Netrunner ;group;20
+nr20b18w.rar;link;20;http://www.mysticbbs.com/downloads/nr20b18w.rar;Windows 32 bit version
+nr20b18l.rar;link;20;http://www.mysticbbs.com/downloads/nr20b18l.rar;Linux 32 bit version
+nr20b186.rar;link;20;http://www.mysticbbs.com/downloads/nr20b186.rar;Linux 64 bit version
+
+Documents ;group;20
+display_codes.txt;file;20;{system}docs/display_codes.txt
+mystic.txt;file;20;{system}docs/mystic.txt
+other.txt;file;20;{system}docs/other.txt
+python.txt;file;20;{system}docs/python.txt
+records.112;file;20;{system}docs/records.112
+text_template.txt;file;20;{system}docs/text_template.txt
+unix.install.txt;file;20;{system}docs/unix.install.txt
+upgrade.txt;file;20;{system}docs/upgrade.txt
+whatsnew.txt;file;20;{system}docs/whatsnew.txt
+windows_door_install.txt;file;20;{system}docs/windows_door_install.txt

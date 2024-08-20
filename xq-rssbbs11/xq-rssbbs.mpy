@@ -1,0 +1,598 @@
+# coding: CP437
+# RetroRoms MPY version 1.0 // June 2021
+# Written by XQTR of Another Droid BBS
+# telnet: andr01d.zapto.org:9999
+# web   : andr01d.zapto.org:8080
+# gopher: andr01d.zapto.org:7070
+
+# The code is written under the GPL3 license, which is included in the package
+# If you use the code, mention it in your project!!!!
+
+from mystic_bbs import *
+import os, sys
+import textwrap
+import json
+import datetime
+import textwrap
+from xml.etree import cElementTree as ET
+
+datadir = getcfg()['script']+'xq-rssbbs'+os.sep
+sys.path.append(datadir)
+from utils import *
+from xmform import *
+scr_width, scr_height = termsize()
+
+# /////////////////////////////////////////////////////////////////////////////
+# --------------------- Customize the variables below -------------------------
+# /////////////////////////////////////////////////////////////////////////////
+# List Colors
+list_normal = 7
+list_high   = 7*16
+list_search = 8
+
+scrollbar_highchar = chr(219)
+scrollbar_lochar = chr(179)
+# You can customize the script to be used in more resolutions than the default
+# 80x25. Change the positions and colors in each block.
+
+# default resolution 80x25
+if scr_width == 80:  
+  #List position in format x,y,w,h
+  listbox = [2,6,78,15] # selection list area
+  catbox = [8,8,72,15] # box popup dimensions
+  textbox = [2,6,77,14] # area to display the feed text
+  
+  cattitle = [12,8,11,10,'left'] # Title of 'Add Category' box popup
+  catlabel = [10,14,8,60,'center'] # 'Add Category' box popup, press key to continue
+  feedtitle = [12,8,11,6,'left'] # Title of 'Add Feed' box popup
+  sumlabel = [3,21,3,76,'left'] # Attributes for category description on menu selection
+  feedname = [3,2,11,70,'left'] # Name of feed in the display feed area
+  
+  footerlabel = [5,24,8,72,'left'] # Footer position
+  
+  form_normal = 7             # Attributes for the form when adding a 
+  form_high = 15+3*16         # new feed/category
+  form_edit_normal = 15
+  form_edit_high = 15 + 3*16
+  form_editing = 7*16
+  form_key_norm = 15
+  form_key_high = 14+3*16
+  
+  #text attributes for textbox appearance, when displaying the feed text
+  tb_pre_feed   = ''
+  tb_pre_title  = '|08-'+'-'*64+'-[ |03Title |08]--'
+  tb_pre_titlesl= '|11'
+  tb_post_titlesl= '|07'
+  tb_pre_linksl= '|08:'
+  tb_post_linksl= '|07'
+  tb_pre_textsl= '|15'
+  tb_post_textsl= '|08'
+  tb_pre_link   = '|08--[ |03Link |08]-'+'-'*65+'-'
+  tb_pre_date   = '|08-'+'-'*52+'-[ |03Date : |11'
+  tb_pre_text   = ''
+  
+  tb_post_title = '|07'
+  tb_post_link  = '|07'
+  tb_post_date  = '|08]---'
+  tb_post_text  = ''
+  tb_post_feed  = '|14R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$R$$BB$'
+  tb_feed_end   = '|11-- ThE EnD --'.center(textbox[2]-3,' ')
+  
+  
+  
+  
+
+
+# /////////////////////////////////////////////////////////////////////////////
+# ------------------ DO NOT CHANGE THE VARs AND CODE BELOW --------------------
+# /////////////////////////////////////////////////////////////////////////////
+feeds = list()
+ml = mlist()
+fl = mlist()
+datadir = dirslash(datadir)
+
+def addcategory(item=None,edit=False):
+  global feeds
+  textcolor(8)
+  ansibox(catbox[0],catbox[1],catbox[2],catbox[3],box1)
+  writelist(cattitle,' Category ')
+  writelist(catlabel,'Press ESC when finished.')
+  form = mform()
+  #typeof,tx,ty,tw,title,vx,vy,vw,vmax,value,key,code,fields=[]):
+  form.cl_normal = form_normal
+  form.cl_high = form_high
+  form.cl_edit_normal = form_edit_normal
+  form.cl_edit_high = form_edit_high
+  form.cl_editing = form_editing
+  form.cl_key_norm = form_key_norm
+  form.cl_key_high = form_key_high
+  if item:
+    form.additem(1,10,10,10,'Title',20,10,50,100,item['data']['title'],'T','title')
+    form.additem(1,10,11,10,'Desc.',20,11,50,100,item['data']['desc'],'e','desc')
+  else:
+    form.additem(1,10,10,10,'Title',20,10,50,100,'','T','title')
+    form.additem(1,10,11,10,'Desc.',20,11,50,100,'','e','desc')
+  #form.additem(5,10,12,10,'Date',20,12,10,10,'','D','date')
+  form.show()
+  if form.changed:
+    if item==None:
+      item=dict()
+      form.results['items']=list()
+      form.results['date'] = datetime.datetime.now().strftime("%Y-%m-%d")
+      item['items']=list()
+      item['title']=form.results['title']
+      item['desc']=form.results['desc']
+      item['date']=form.results['date']
+      feeds.append(item)
+    else:
+      item['data']['title']=form.results['title']
+      item['data']['desc']=form.results['desc']
+
+def addfeed(category,feed=None,edit=False):
+  global feeds
+  textcolor(8)
+  ansibox(catbox[0],catbox[1],catbox[2],catbox[3],box1)
+  writelist(feedtitle,' Feed ')
+  writelist(catlabel,'Press ESC when finished.')
+  form = mform()
+  #typeof,tx,ty,tw,title,vx,vy,vw,vmax,value,key,code,fields=[]):
+  form.cl_normal = form_normal
+  form.cl_high = form_high
+  form.cl_edit_normal = form_edit_normal
+  form.cl_edit_high = form_edit_high
+  form.cl_editing = form_editing
+  form.cl_key_norm = form_key_norm
+  form.cl_key_high = form_key_high
+  if feed:
+    form.additem(1,10,10,10,'Title',20,10,50,100,feed['title'],'T','title')
+    form.additem(1,10,11,10,'Desc.',20,11,50,100,feed['desc'],'D','desc')
+    form.additem(1,10,12,10,'URL',20,12,50,100,feed['link'],'U','link')
+  else:
+    form.additem(1,10,10,10,'Title',20,10,50,100,'','T','title')
+    form.additem(1,10,11,10,'Desc.',20,11,50,100,'','D','desc')
+    form.additem(1,10,12,10,'URL',20,12,50,100,'','U','link')
+  form.show()
+  if form.changed:
+    if feed==None:
+      item=dict()
+      form.results['date'] = datetime.datetime.now().strftime("%Y-%m-%d")
+      item['title']=form.results['title']
+      item['desc']=form.results['desc']
+      item['date']=form.results['date']
+      item['link']=form.results['link']
+      #print '\033[0;37m '
+      category['items'].append(item)
+    else:
+      feed['title']=form.results['title']
+      feed['desc']=form.results['desc']
+      feed['link']=form.results['link']
+    
+
+def savelist2json(lista,filename):
+  try:
+    with open(filename, 'w+') as outfile:
+      json.dump(lista, outfile,indent=2)
+    return 0
+  except:
+    return -1
+
+def loadjson2list(filename):
+  try:
+    if os.path.exists(filename):
+      with open(filename) as json_file:
+        jlist = json.load(json_file)
+        return jlist
+    else:
+      return None
+  except:
+    return None
+
+def xml2dict(filename):
+  if not os.path.isfile(filename): return None
+  fn = open(filename,'r')
+  e = ET.XML(fn.read())
+  fn.close()
+  return etree_to_dict(e)
+  
+def dispansi(ansifile):
+  #print getcfg()['text']
+  if os.path.isfile(ansifile):
+    menucmd('GD','@0@false@'+ansifile)
+  elif os.path.isfile(datadir+ansifile):
+    menucmd('GD','@115000@false@'+datadir+ansifile)
+  elif os.path.isfile(getcfg()['text']+ansifile):
+    menucmd('GD','@115000@false@'+getcfg()['text']+ansifile)
+    
+def getfeeds():
+  global feeds
+  del feeds[:]
+  if os.path.isfile(datadir+'feeds.json'):
+    feeds = loadjson2list(datadir+'feeds.json')
+  
+def oncategoryselect(itm):
+  writelist(sumlabel,itm['data']['desc'])
+  
+def onfeedselect(itm):
+  writelist(sumlabel,itm['data']['desc'])
+  
+def categoriessysopmenu():
+  global feeds
+  global ml
+  write('|SS') # Savescreen
+  write('|#V#Manage Category#30#12# Categories #A-Add,E-Edit,D-Delete,Q-Quit#')
+  ch = onekey(chr(13) + 'AEDQ', False)
+  ch = ch.upper()
+  if ch == 'A':
+    addcategory()
+    refreshmlist()
+  elif ch == 'E':
+    addcategory(ml.selected,True)
+    refreshmlist()
+  elif ch == 'D':
+    clrscr()
+    for i in range(len(feeds)-1):
+      textcolor(14)
+      print feeds[i]['title']
+      print ml.selected['text']
+      if feeds[i]['title'] == ml.selected['text']:
+        del feeds[i]
+        refreshmlist()
+        break
+  write('|RS') #restore screen
+  ml.draw()
+  ml.bar_on()
+  
+def findcategorybytitle(title):
+  global feeds
+  if not feeds: return None
+  for i in range(len(feeds)):
+    if feeds[i]['title']==title:
+      return feeds[i]
+      
+def getcategoryindex(title):
+  global feeds
+  if not feeds: return None
+  for i in range(len(feeds)):
+    if feeds[i]['title']==title:
+      return i
+      
+def findfeedbytitle(category,title):
+  global feeds
+  if not feeds: return None
+  if not category['items']: return None
+  for i in range(len(category['items'])):
+    if category['items'][i]['title'] == title:
+      return category['items'][i]
+      
+  
+def feedssysopmenu():
+  global feeds
+  global fl
+  global ml
+  write('|SS') # Savescreen
+  write('|#V#Manage Feeds#30#12# Feeds #A-Add,E-Edit,D-Delete,Q-Quit#')
+  ch = onekey(chr(13) + 'AEDQ', False)
+  ch = ch.upper()
+  if ch == 'A':
+    tmpcat = findcategorybytitle(ml.selected['data']['title']) 
+    addfeed(tmpcat)
+    refreshflist(tmpcat)
+  elif ch == 'E':
+    tmpcat = findcategorybytitle(ml.selected['data']['title']) 
+    addfeed(tmpcat,findfeedbytitle(tmpcat,fl.selected['text']),True)
+    refreshflist(tmpcat)
+  elif ch == 'D':
+    clrscr()
+    tmpcat = findcategorybytitle(ml.selected['data']['title']) 
+    for i in range(len(tmpcat['items'])):
+      if tmpcat['items'][i]['title'] == fl.selected['text']:
+        del tmpcat['items'][i]
+        refreshflist(tmpcat)
+        break
+  write('|RS') #restore screen
+  fl.draw()
+  fl.bar_on()
+  
+def oncategoryotherkeys(ext,key):
+  if not ext:
+    if key == KEY_CTRLZ:
+      write('|SS')
+      clrscr()
+      dispansi('help.ans')
+      pause(False)
+      clrscr()
+      write('|RS')
+    if key == KEY_CTRLQ:
+      categoriessysopmenu()
+      
+def onfeedsotherkeys(ext,key):
+  if not ext:
+    if key == KEY_CTRLZ:
+      write('|SS')
+      clrscr()
+      dispansi('help.ans')
+      pause(False)
+      clrscr()
+      write('|RS')
+    if key == KEY_CTRLQ:
+      feedssysopmenu()
+      
+def downloadfeed(feeditem):
+  link=feeditem['data']['link']
+  boxpopup('Retrieving feed data. Please wait...',10,False)
+  writexy(1,1,14,'')
+  os.system(datadir+'getfeed.py "'+link+'" '+datadir+'temp.tmp')
+  if os.path.isfile(datadir+'temp.tmp'):
+    return True
+  else:
+    return False
+    
+def savelist(lst,filename):
+  try:
+    fn = open(filename,'w')
+    for l in lst:
+      fn.write(stripmci(l)+'\n')
+    fn.close()
+    return True
+  except:
+    return False
+    
+def wordwrap(txt,wd):
+  return textwrap.wrap(txt, width=wd)
+    
+def displayfeed(filename):
+  global fl
+  global textbox
+  global tb_pre_feed  
+  global tb_pre_title
+  global tb_pre_titlesl
+  global tb_post_titlesl
+  global tb_pre_linksl
+  global tb_post_linksl
+  global tb_pre_link  
+  global tb_pre_date  
+  global tb_pre_text  
+  
+  global tb_post_title
+  global tb_post_link 
+  global tb_post_date 
+  global tb_post_text 
+  global tb_post_feed 
+    
+  wdth = textbox[2]
+  height = textbox[3]
+  
+  if not os.path.isfile(filename): return False
+  tmpfeeds = loadjson2list(filename)
+  if not tmpfeeds: return False
+  top = 0
+  height = textbox[3]
+  text = list()
+  
+  for f in tmpfeeds:
+    text.append(tb_pre_feed)
+    text.append(tb_pre_title)
+    for line in wordwrap(f['title'],wdth-mcilen(tb_pre_titlesl)-mcilen(tb_post_titlesl)-1):
+      text.append(tb_pre_titlesl+line.ljust(wdth,' ')+tb_post_titlesl)
+    #text.extend(wordwrap(f['title'],wdth))
+    text.append(tb_post_title)
+    text.append(tb_pre_link)
+    for line in wordwrap(f['link'],wdth-mcilen(tb_pre_linksl)-mcilen(tb_post_linksl)-1):
+      text.append(tb_pre_linksl+line.ljust(wdth,' ')+tb_post_linksl)
+    #text.extend(wordwrap(f['link'],wdth))
+    text.append(tb_post_link)
+    text.append(tb_pre_date+f['date']+tb_post_date)
+    text.append(tb_pre_text)
+    for line in wordwrap(f['summary'],wdth-mcilen(tb_pre_textsl)-mcilen(tb_post_textsl)-1):
+      text.append(tb_pre_textsl+line.ljust(wdth-1,' ')+tb_post_textsl)
+    #text.extend(wordwrap(f['summary'],wdth))
+    text.append(tb_post_text)
+    text.append(tb_post_feed)
+  text.append(tb_feed_end)
+  
+  i = 0
+  writelist(feedname,fl.selected['text'])
+  writelist(footerlabel,'CTRL-Z: Help | ESC: Back')
+  
+  while True and not shutdown():
+    
+    for i in range(height):
+      if top+i<len(text) and i<height: 
+        writexy(textbox[0],textbox[1]+i,7,text[top+i]+' '*(wdth-mcilen(text[top+i])))
+      else:
+        writexy(textbox[0],textbox[1]+i,7,' '*wdth)
+          
+    key, ext = getkey()
+    if not ext:
+      if key == KEY_ESCAPE: break
+      elif key in ['x','X']:
+        if savelist(text,datadir+'feed.txt'):
+          menucmd('F3',datadir+'feed.txt')
+          clrscr()
+          dispansi('bg.ans')
+          writelist(feedname,fl.selected['text'])
+          writelist(footerlabel,'CTRL-Z: Help | ESC: Back')
+          os.remove(datadir+'feed.txt')
+      elif key in ['n','N']:
+        if top+height>len(text): pass
+        if text[top] == tb_post_feed:
+          top+=1
+        for k in range(top,len(text)):
+          if text[k] == tb_post_feed:
+            top = k
+            break
+      elif key in ['p','P']:
+        if top < 2: pass
+        k = top
+        while k>2:
+          k-=1
+          if text[k] == tb_post_feed:
+            top=k
+            break
+        
+    else:
+      if key == KEY_UP:
+        top-=1
+        if top<0: top=0
+      elif key == KEY_DOWN:
+        top+=1
+        if top+height>len(text):
+          top = len(text)-height
+          if top<0: top = 0
+      elif key == KEY_HOME:
+        top = 0
+      elif key == KEY_END:
+        top = len(text)-height
+        if top<0: top = 0
+      elif key == KEY_PGDN:
+        top+=height
+        if top+height>len(text):
+          top = len(text)-height
+          if top<0: top = 0
+      elif key == KEY_PGUP:
+        top-=height
+        if top<0: top=0
+      elif key == KEY_RIGHT:
+        if top+height>len(text): pass
+        if text[top] == tb_post_feed:
+          top+=1
+        for k in range(top,len(text)):
+          if text[k] == tb_post_feed:
+            top = k
+            break
+      elif key == KEY_LEFT:
+        if top < 2: pass
+        k = top
+        while k>2:
+          k-=1
+          if text[k] == tb_post_feed:
+            top=k
+            break
+  
+  
+  del text[:]
+  return True
+  
+      
+def listfeed(category):
+  global fl
+  global feeds
+  clrscr()
+  dispansi('bg.ans')
+  fl.clear()
+  
+  fl.cl_normal = list_normal
+  fl.cl_high   = list_high
+  fl.cl_key_norm = 15 + 16
+  fl.cl_key_high = 11 + 3*16
+  fl.search_show = True
+  fl.search = ''
+  fl.searchx = listbox[0]
+  fl.searchy = listbox[1]+listbox[3]-2
+  fl.searchw = listbox[2]
+  fl.search_at= list_search
+  fl.scrollbar["hichar"]=scrollbar_highchar
+  fl.scrollbar['lochar']=scrollbar_lochar
+  fl.onbaron = onfeedselect
+  fl.otherkeys = onfeedsotherkeys
+  fl.sort = True
+  
+  refreshflist(category)
+  
+  if issysop():
+    writelist(footerlabel,'CTRL-Z: Help | CTRL-Q: Sys.Menu | ESC: Back')
+  else:
+    writelist(footerlabel,'CTRL-Z: Help | ESC: Back')
+  while True and not shutdown():
+    res=fl.show(listbox[0],listbox[1],listbox[2],listbox[3]-1)
+    if fl.exitcode == '#esc': break
+    if fl.exitcode == '#enter':
+      downloadfeed(fl.selected)
+      if not displayfeed(datadir+'temp.tmp'):
+        boxpopup('Could not retrieve feed!',10)
+      else:
+        clrscr()
+        dispansi('bg.ans')
+        if issysop():
+          writelist(footerlabel,'CTRL-Z: Help | CTRL-Q: Sys.Menu | ESC: Quit')
+        else:
+          writelist(footerlabel,'CTRL-Z: Help | ESC: Quit')
+        
+      
+
+def refreshmlist():
+  global feeds
+  global ml
+  ml.clear()
+  for s in feeds:
+    item = dict()
+    item['text'] = s['title']
+    item['data'] = s
+    ml.additem(item)
+    
+def refreshflist(category):
+  global feeds
+  global fl
+  fl.clear()
+  if not category['items']: return
+  i = 0
+  for s in category['items']:
+    i+=1
+    item = dict()
+    item['text'] = s['title']
+    item['data'] = s
+    fl.additem(item)
+  
+def main():
+  global feeds
+  global ml
+  clrscr()
+  dispansi('bg.ans')
+  
+  
+  ml.cl_normal = list_normal
+  ml.cl_high   = list_high
+  ml.cl_key_norm = 15 + 16
+  ml.cl_key_high = 11 + 3*16
+  ml.search_show = True
+  ml.search = ''
+  ml.searchx = listbox[0]
+  ml.searchy = listbox[1]+listbox[3]-2
+  ml.searchw = listbox[2]-2
+  ml.search_at= list_search
+  ml.scrollbar["hichar"]=scrollbar_highchar
+  ml.scrollbar['lochar']=scrollbar_lochar
+  ml.onbaron = oncategoryselect
+  ml.otherkeys = oncategoryotherkeys
+  ml.sort = True
+  
+  if not feeds:
+    feeds = list()
+    while not feeds:
+      addcategory()
+  
+  refreshmlist()
+    
+  if issysop():
+    writelist(footerlabel,'CTRL-Z: Help | CTRL-Q: Sys.Menu | ESC: Quit')
+  else:
+    writelist(footerlabel,'CTRL-Z: Help | ESC: Quit')
+  while True and not shutdown():
+    res=ml.show(listbox[0],listbox[1],listbox[2],listbox[3]-1)
+    if ml.exitcode == '#esc': break
+    if ml.exitcode == '#enter':
+      if not res['data']['items'] and not issysop():
+        boxpopup("There aren't any feeds in this category.",10)
+      else:
+        listfeed(res['data'])
+      
+  
+  
+
+getfeeds()
+main()
+if feeds:
+  savelist2json(feeds,datadir+'feeds.json')
+if os.path.isfile(datadir+'temp.tmp'):
+  os.remove(datadir+'temp.tmp')
+clrscr()

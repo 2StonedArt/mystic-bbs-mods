@@ -1,0 +1,729 @@
+# What's new 
+# Version 0.4
+# - Added SEXYZ download support
+# - Added protocol popup menu
+# - Added file caching for network drive file storage. SEXYZ fails if a slow share response
+#	time occurs. 
+# Version 0.5
+# - Fix Menu num_scr_lines being off by 1. Fixed associated menus bottom_y to reflect
+# - Added menu padding and fixed clearing background for clear menus
+# - Rewrote popup queue and added CTRL-D to download. More intuitive and less keystrokes
+# - Added Q key to view queue
+# - Fixed ANSIs to support
+# - Removed ICE colors. 
+# Version 0.6
+# - Added scrollbar support
+# - Added HOME, END, PGUP, PGDOWN scrolling support
+# - Added MCI stripping for |XX color codes and |[XXX or |[YXX location strings to get effective description
+#	length for proper rendering
+# - Added tab and arrow menu tabstop looping.
+# - Removed resetting the filebases and filelist on leave/enter events. Retains history as you loop
+# - Cleaned up event signatures
+# Version 0.7
+# - Added ItemDecorator for toggline menu items as active - mainly for marking for download
+# - Added support to toggle menu item decorators after manipulating queue
+# - Changed ENTER to SPACE for toggling files for download
+# - Add padding for menus so that actual menu x,y,top,bottom can be cleared on the screen while menu items.
+#	can use a smaller space inside. This will fix the black background in overlay/popup menus showing the
+#	contents behind.
+# Version 0.8
+# - Added DLACS check when adding file to queue, notifying users that file requires other access level
+# - Refactored menuitem attr1 to contain full file(group/base/list/rec) object
+# - Refactored to use Struct instead of Construct library for unpacking Mystic records
+# - Added 'v/V' to view files with Mystic file viewer
+# - Added y/n to exit to avoid accidental exits
+# - Added screen box support
+# - Refactored all mystic native calls as bbs.CALL for readability
+# - Added support for empty filegroups (no filebases/files) to avoid crashing
+# Version 0.9 Beta - Released
+# - Added group/base/file alphabetical sorting
+# - Fixed bug when toggling a file for the queue, it would truncate the shown file name due to the
+#	decorator length
+# - Refactored Menu to support blockscroll in constructor. Refactored scrolling to support for cleanliness.
+# - Added Marquee for long menu item names. This will scroll the text 
+# Wants:
+# - Add ICE color toggle. Keyed off user flags? I hate to write to Mystic records to do so. Maybe
+#	select on enter or Sysop toggle?
+# - Add menu bounds class for x,y,top,bottom
+# - Add file bases record caching instead of getfbaseid() mystic call that has indeterministic behavior
+#	for showing files that are marked for download.
+# - Add queue length for max files per day.
+# - Add queue byte monitoring for max bytes/day.
+
+import mystic_bbs as bbs # pylint: disable=import-error
+bbs.write("|CL")
+
+import sys, os, time, math, re, struct
+from shutil import copyfile
+from collections import OrderedDict as OD
+
+import_success = True
+try:
+	import dprMenus as dpm
+except ImportError:
+	import_success = False
+	bbs.writeln("|12Import error! Please \"pip install dprMenus\"")
+ 
+version = str(0.9) + " |04Beta"
+# UGH Yes some globals
+# Entries in download queue are Filename: Full_path for easy batch downloading
+download_queue = OD()
+readonly = False
+flush_stdio = False
+
+KEY_ESCAPE   = chr(27)
+KEY_UP       = chr(72)
+KEY_DOWN     = chr(80)
+KEY_ENTER    = chr(13)
+KEY_TAB      = chr(9)
+KEY_LEFT     = chr(75)
+KEY_RIGHT    = chr(77)
+KEY_QMARK    = chr(63)
+KEY_DEL		 = chr(83)
+KEY_CTRLD	 = chr(4)
+KEY_PGUP	 = chr(73)
+KEY_PGDN	 = chr(81)
+KEY_HOME 	 = chr(71)
+KEY_END		 = chr(79)
+KEY_SPACE	 = chr(32)
+
+# Cache local file copies? Turn this on if your files are on a network share or slow to access.
+# SEXYZ will fail if it cannot read the files fast enough. Copying locally will eliminate that.
+# The files are deleted after download, so there is no residue.
+cache_local = True
+
+# File group menu window definitions. These are in screen coordinates. Please align with your ANSI
+fgx = 3 # Top left menu window coordinate
+fgwidth = 13 # Width of window
+fgTop = 3 # Top of window
+fgBottom = 12 # Bottom of window
+
+# File base menu window definitions.
+fbx = 18
+fbwidth = 37
+fbTop = 3
+fbBottom = 12
+
+# File list menu window definitions
+fix = 57
+fiwidth = 21
+fiTop = 3
+fiBottom = 22
+
+# Description menu window definitions
+dx = 3
+dwidth = 52
+dtop = 14
+dbottom = 20
+
+# Note location, not a Menu class object but useful for indicating actions. One line only!
+nx = 4
+ny = 22
+
+def get_fg(self):
+    filegroups = []
+    for i in range(0,200):
+        fg = bbs.getfgroupid(i)
+        if not fg:
+           continue
+        if bbs.access(fg['acs']):
+            filegroups.append(fg)
+    if len(filegroups) is 0:
+        bbs.writeln("No filegroups found |PA")
+        self.items.append(dpm.MenuItem("None", -1, "Empty", "|20|00", "|16|08", attr1=None))
+    else:
+        for fg in sorted(filegroups, key=lambda x: x['name'].upper()):
+            self.items.append(dpm.MenuItem(fg['name'], fg['id'], fg['name']))
+
+    self.index = 0
+
+def get_fb(menu):
+    del menu.items[:]
+    try:
+        filebases = []
+        for i in range(0,300):
+            fb = bbs.getfbaseid(i)
+            if not fb:
+                continue
+            if bbs.access(fb['listacs']):
+                filebases.append(fb)
+    except:
+        e = sys.exc_info()[0]
+        redraw()
+
+    # If no filebases, add empty file base
+    if len(filebases) is 0:
+        menu.items.append(dpm.MenuItem("None", -1, "Empty", "|20|00", "|16|08", attr1=None))
+    else:
+        for fb in sorted(filebases, key=lambda x: x['name'].upper()):
+            menu.items.append(dpm.MenuItem(fb['filename'], str(fb['id']), fb['name'], attr1=fb))
+            
+def get_files(self, menu):
+    del menu.items[:]
+    # If no filebases in this group, add empty file list and return
+    if self.curr_item.attr1 is None:
+        menu.items.append(dpm.MenuItem("None", -1, "Empty", "|20|00", "|16|08", attr1=None))
+        return
+    global download_queue
+
+    filebase_rec = bbs.fl_open(str(self.curr_item.attr1.get('filename')))
+
+    if not filebase_rec:
+        show_note("|04ERROR: |08Unable to open filebase")
+        menu.items.append(dpm.MenuItem("None", -1, "Cannot open record", "|20|00", "|16|08", attr1=None))
+        return
+
+    bbs.fl_seek(filebase_rec,0,True)
+    file_rec_list = []
+
+    while bbs.fl_found(filebase_rec):
+        file_info = bbs.fl_getfile(filebase_rec)
+        file_info['dlacs'] = self.curr_item.attr1.get('dlacs')
+        file_info['filepath'] = self.curr_item.attr1.get('path')
+        file_info['desc'] = []
+        file_desc = bbs.fl_getdesc(filebase_rec)
+        for i in range(0,file_info['lines']):
+            file_info['desc'].append(file_desc[i])
+        file_rec_list.append(file_info)
+        bbs.fl_next(filebase_rec)
+
+    if len(file_rec_list) is 0:
+        menu.items.append(dpm.MenuItem("None", -1, "Empty", "|20|00", "|16|08", attr1=None))
+    else:
+        counter = 0
+        # Sort files, however if some are Capital and some are lowercase, they will sort differently
+        # So sort by converting all to uppercase. They will still show with original case in the list
+        for fr in sorted(file_rec_list, key=lambda x: x['filename'].upper()):
+            item = dpm.MenuItem(fr['filename'], 0, fr['filename'], decorator=dpm.ItemDecorator(decorator= "*", colors = "|16|12"), attr1=fr)
+            for key, value in download_queue.items():
+                if key == item.name:
+                    item.is_active = True
+            menu.items.append(item)
+            counter = counter + 1
+    bbs.fl_close(filebase_rec)
+
+def get_desc(self, menu):
+    del menu.items[:]
+    if self.curr_item.attr1 is None:
+        menu.items.append(dpm.MenuItem("None", -1, "No Description", "|20|00", "|16|08", attr1=None))
+        return True
+    
+    for line in self.curr_item.attr1['desc']:
+        menu.items.append(dpm.MenuItem("desc", 0, line))
+
+    return True
+
+def popup_downloads(self, queue):
+    global download_queue
+    menuQ = dpm.Menu("queue", x=26, top_y=5, bottom_y=13, col_width=29)
+    menuQ.onInit = popupQueueOnInit
+    menuQ.onAction = popupQueueOnAction
+
+    counter = 0
+    for filename,path in sorted(queue.items()):
+        menuQ.items.append(dpm.MenuItem(filename, counter, filename, attr1=path))
+        counter = counter + 1
+
+    dpm.Utils.writexy(0, 0, "|DFfilebrws_download|")
+    menuQ.on_init()
+    menuQ.draw(True)
+    
+    while not bbs.shutdown():
+        bbs.write("|PB")
+        char, extended = bbs.getkey()
+        if extended:
+            if char == KEY_UP:
+                menuQ.scroll(dpm.ScrollDir.up)
+            if char == KEY_DOWN:
+                menuQ.scroll(dpm.ScrollDir.down)
+            if char == KEY_PGDN:
+                menuQ.scroll(dpm.ScrollDir.down_page)
+            if char == KEY_PGUP:
+                menuQ.scroll(dpm.ScrollDir.up_page)
+            if char == KEY_HOME:
+                menuQ.scroll(dpm.ScrollDir.home)
+            if char == KEY_END:
+                menuQ.scroll(dpm.ScrollDir.end)
+            if char == KEY_DEL:
+                menuQ.on_action({"delete_entry":queue})
+                # Toggle decorator off
+                for menu in self.menu_list.menus:
+                    if menu.name is "filelist":
+                        for item in menu.items:
+                            if item.name not in download_queue:
+                                item.is_active = False 
+        else:
+            if char == KEY_ESCAPE or char == 'q' or char == 'Q':
+                break
+            if char == KEY_CTRLD:
+                x = menuQ.on_action({"download":queue})
+                # Jump out of popup after downloads are complete
+                if x is "download_complete":
+                    # Toggle decorator off
+                    for menu in self.menu_list.menus:
+                        if menu.name is "filelist":
+                            for item in menu.items:
+                                if item.name not in download_queue:
+                                    item.is_active = False 
+                    break
+                # Error while copying files before download
+                elif x is False:
+                    break
+                # Refresh popup	
+                dpm.Utils.writexy(0, 0, "|DFfilebrws_download|")
+            if char == 'r' or char == 'R':
+                # Redraw 
+                dpm.Utils.writexy(0, 0, "|DFfilebrws_download|")
+        menuQ.draw(True)		
+
+def popupQueueOnAction(self, argss):
+    global cache_local
+
+    for command, args in argss.items():
+
+        if command is "delete_entry":
+            if len(args.items()) is 0:
+                return
+            if self.curr_item.name in args:
+                show_note("|15Removed |12" + self.curr_item.name + "|15 from queue")
+
+                # Delete item from queue
+                args.pop(self.curr_item.name)
+
+                # Delete item from menu
+                del self.items[self.index]
+
+                # Reset index
+                if len(self.items) > 0:
+                    # Make sure the index is in bounds
+                    if self.index >= len(self.items):
+                        self.index = len(self.items) - 1
+                        # If we just deleted the last item on the page, we need to adjust the top_index too
+                        if self.index < self.top_index:
+                            self.top_index = self.index
+                else:
+                    self.index = -1 
+                # Force rescan files after deletion
+                return True
+        elif command is "download":
+            if len(args.items()) is 0:
+                return
+
+            protocol = get_protocol_popup()
+            if protocol is None:
+                return
+
+            bbs.writeln("|CL|16|08 Generating batch queue...")
+            target_dir = bbs.getcfg()['temp']
+            sexyz_list_path = target_dir + "download_list.txt"
+            fp = open(sexyz_list_path, mode='w')
+        
+        # Sanity check that file actually exists. Creates readonly safety
+            if not os.path.isfile(sexyz_list_path):
+                fp.close()
+                return
+        
+            # Since my board uses a share drive file storage, I copy files first or SEXYZ
+            # might fail. Turn this off at the top by changing cache_local = False
+            # If True, this will first copy files to temp# node dir. Then delete after download
+                
+            cache_list = []
+
+            # Add items to download file for sexyz
+            for key,value in sorted(args.items()):
+            
+                # If local only use filenames because we are copying them to temp# dir
+                if cache_local:
+                    bbs.writeln("|08 Caching |15" + key + "|08...|DE")
+                    fp.write(target_dir + key + "\n")
+                    cache_list.append(target_dir + key)
+                    try:
+                        copyfile(value, target_dir + key)
+                    except IOError as e:
+                        dpm.Utils.writexy(1,22,"|04ERROR:|15Unable to copy file.|CR%s|DE|DE|DE|DE" % e)
+                        return False
+                    except OSError as e:
+                        dpm.Utils.writexy(1,22,"|04ERROR:|15Unable to copy file.|CR%s|DE|DE|DE|DE" % e)
+                        return False
+                    except:
+                        dpm.Utils.writexy(1,22,"|04Unexpected ERROR:|15|CR%s|DE|DE|DE|DE" % sys.exc_info())
+                        return False
+                # Leave files where they are and pull full path in sexyz download list
+                else:
+                    bbs.writeln("|08 Preparing |15" + key + "|08...|DE")
+                    fp.write(value + "\n")
+            fp.close()
+        
+            # Purge queue
+            args.clear()
+            bbs.writeln("|15 Press any key to start download|PN")
+            bbs.writeln("|08 Initiating |15" + protocol + " |08file transfer ...")
+            
+            # Call sexyz to download
+            if protocol is "Ymodem":
+                if os.name == 'nt':
+                    # Use socket descriptor for Windows
+                    bbs.menucmd("DD", bbs.getcfg()['system'] + r"sexyz %H -telnet sY @" + str(sexyz_list_path))    
+                else:
+                    # Posix - stdio
+                    bbs.menucmd("DD", bbs.getcfg()['system'] + r"sexyz -telnet sY @" + str(sexyz_list_path))
+            elif protocol is "Zmodem":
+                # Windows
+                if os.name == 'nt':
+                    # Use socket descriptor for Windows
+                    bbs.menucmd("DD", bbs.getcfg()['system'] + r"sexyz %H -telnet -8 sz @" + str(sexyz_list_path))
+                else:
+                    # Posix - stdio
+                    bbs.menucmd("DD", bbs.getcfg()['system'] + r"sexyz -telnet -8 sz @" + str(sexyz_list_path))
+
+            bbs.writeln("|15 |DEDownload complete, press any key to continue|PN")
+            # Remove file for clutter reasons. This would be overwritten anyways next download call
+            os.remove(sexyz_list_path)
+            if cache_local:
+                bbs.writeln("Cleaning up...")
+                for local_file in cache_list:
+                    os.remove(local_file)
+
+            return "download_complete"
+
+def get_protocol_popup():
+    # The full file path is: self.items[self.index].attr2 + self.items[self.index].name
+    menuProt = dpm.Menu("protocols", x=35, top_y=9, bottom_y=10, col_width=11, left_pad=3)
+    menuProt.items.append(dpm.MenuItem("Ymodem", 1, "Ymodem"))
+    menuProt.items.append(dpm.MenuItem("Zmodem", 2, "Zmodem"))
+    menuProt.index = 0
+    menuProt.draw(True)
+    dpm.Utils.writexy(0, 0, "|DFfilebrws_protocol|")
+    while not bbs.shutdown():
+        bbs.write("|PB")
+        char, extended = bbs.getkey()
+        if extended:
+            if char == KEY_UP:
+                menuProt.scroll(dpm.ScrollDir.up)
+            if char == KEY_DOWN:
+                menuProt.scroll(dpm.ScrollDir.down)
+        if char == KEY_ESCAPE:
+            break
+        if char == KEY_ENTER:
+            return menuProt.items[menuProt.index].name
+        if char == 'r' or char == 'R':
+            # Redraw 
+            dpm.Utils.writexy(0, 0, "|DFfilebrws_protocol|")
+        menuProt.draw(True)		
+
+def popupQueueOnInit(self):
+    self.index = 0
+
+def show_desc(menu):
+    for i in range (0,4):
+        dpm.Utils.writexy(4,14+i, ' ' * 70)
+    if hasattr(menu, 'item_desc'):
+        counter = 0
+        if menu.index > len(menu.items):
+            return
+        if menu.curr_item.name not in menu.item_desc:
+            return
+        for line in menu.item_desc[menu.curr_item.name][0:4]:
+            dpm.Utils.writexy(4,14 + counter, line )
+            counter = counter + 1
+    
+def filegroupsOnInit(self):
+    get_fg(self)
+    filegroupOnSelect(self)
+
+def filegroupsOnAction(self, args):
+    for key, value in args.items():
+        if key is "Show":
+            popup_downloads(self, value)
+            redraw()
+
+def filegroupOnSelect(self):
+    # Select file group
+    bbs.menucmd("FG", str(self.curr_item.id))
+
+    # Gather appropriate file bases, find bases menu by name
+    for menu in self.menu_list.menus:
+        if menu.name is "filebases":
+            get_fb(menu)
+            menu.index = -1
+            menu.top_index = 0
+        elif menu.name is "filelist":
+            del menu.items[:]
+        elif menu.name is "filedescriptions":
+            del menu.items[:]
+        else:
+            pass
+            
+def filegroupOnEnter(self):
+    pass
+
+def filebaseOnAction(self, args):
+    for key, value in args.items():
+        if key is "Show":
+            popup_downloads(self, value)
+            redraw()
+
+def filebaseOnSelect(self):
+    for menu in self.menu_list.menus:
+        if menu.name is "filelist":
+            get_files(self, menu)
+            menu.index = -1
+            menu.top_index = 0
+        elif menu.name is "filedescriptions":
+            del menu.items[:]
+        else:
+            pass
+
+def filebaseOnEnter(self):
+    if self.index is -1:
+        self.index = 0
+
+def filelistOnAction(self, args):
+    for key, value in args.items():
+        if key is "Add":
+            if self.index is -1 or self.curr_item.name is "None":
+                return
+            # If already added, remove
+            if self.curr_item.is_active:
+                value.pop(self.curr_item.name)
+                self.curr_item.is_active = False
+                show_note("|15Removed |12" + self.curr_item.name + "|15 from queue")
+            else:
+                if bbs.acsnogroup(self.curr_item.attr1['dlacs']):
+                    value.update({self.curr_item.name : self.curr_item.attr1['filepath'] + self.curr_item.name})
+                    self.curr_item.is_active = True
+                    show_note("|15Added |12" + self.curr_item.name + "|15 to queue")
+                else:
+                    show_note("|04Insufficient level to download this file")
+        elif key is "Show":
+            popup_downloads(self, value)
+            redraw()
+        elif key is "View":
+            if self.index is -1 or self.curr_item.name is "None":
+                return
+            dpm.Utils.draw_box(2, color="|04")
+            bbs.writeln("|[X04|[Y11|08File|04: |03%s" % self.curr_item.name)
+            if bbs.getyn("|[X04|08View this archive? :", 11):
+                bbs.stuffkey(self.curr_item.name + chr(13) )
+                bbs.menucmd("FV", "" )
+            redraw()
+
+def filelistOnEnter(self):
+    if self.index is -1:
+        self.index = 0
+
+def filelistOnSelect(self):
+    for menu in self.menu_list.menus:
+        if menu.name is "filedescriptions":
+            if not get_desc(self, menu):
+                show_note("|04ERROR: |15Unable to load file descriptions!")
+            break
+
+def filedescriptionsOnAction(self, args):
+    for key, value in args.items():
+        if key is "Show":
+            popup_downloads(self, value)
+            redraw()
+
+def filedescriptionsOnEnter(self):
+    self.index = self.top_index = 0
+
+def filedescriptionsOnLeave(self):
+    self.index = self.top_index = 0
+
+def redraw():
+    bbs.write("|CL")
+    bbs.showfile("filebrws", 0, False, False, False)
+    #bbs.menucmd('GD','@0@false@fileview')
+    bbs.write("|[X20|[Y01 |04.|08dPR|04. |11F|03ile|11B|03rowser |07" + version + " |07F|08or |07M|08ystic |071.12")
+
+def draw_help(filepath):
+    if filepath is None:
+        return
+    # Clear the background or characters will show through
+    for i in range(5,21):
+        dpm.Utils.writexy(16,i, ' ' *47)
+    dpm.Utils.writexy(0,0,"|DFfilebrws_help|")
+    bbs.write("|PN")
+    redraw()
+
+def show_note(note_string, note_colors="|15"):
+    n_max_width = 52
+    clr = ' ' * n_max_width
+    x = len(note_string) - len(dpm.Utils.strip_mci(note_string)) 
+    dpm.Utils.writexy(nx, ny, clr)
+    dpm.Utils.writexy(nx,ny, note_colors + str(note_string[:n_max_width + x]) )
+    dpm.Utils.writexy(nx,ny, note_colors)
+
+def get_keys():
+    global readonly, flush_stdio
+    # help_displayed = False
+    redraw()
+    
+    menu_list = dpm.MenuList()
+
+    menuFg = dpm.Menu("filegroups", fgx, fgTop, fgBottom, fgwidth, decorators=[dpm.MenuDecorator(6, 2, decorator = "*", colors = "|16|12"), dpm.MenuDecorator(13, 2, decorator = "*", colors = "|16|12")])
+    menuFg.onAction = filegroupsOnAction
+    menuFg.onInit = filegroupsOnInit
+    menuFg.onSelect = filegroupOnSelect
+
+    menuFg.onEnter = filegroupOnEnter
+    menuFb = dpm.Menu("filebases", fbx, fbTop, fbBottom, fbwidth, decorators=[dpm.MenuDecorator(x=34, y=2, decorator = "*", colors="|16|12"), dpm.MenuDecorator(x=40, y=2, decorator = "*", colors="|16|12")])
+    menuFb.onAction = filebaseOnAction
+    menuFb.onSelect = filebaseOnSelect
+    menuFb.onEnter = filebaseOnEnter
+
+    menuFi = dpm.Menu("filelist", fix, fiTop, fiBottom, fiwidth, decorators=[dpm.MenuDecorator(x=63, y=2, decorator = "*", colors="|16|12"), dpm.MenuDecorator(x=73, y=2, decorator = "*", colors="|16|12")])
+    menuFi.onAction = filelistOnAction
+    menuFi.onSelect = filelistOnSelect
+    menuFi.onEnter = filelistOnEnter
+
+    menuDesc = dpm.Menu("filedescriptions", dx, dtop, dbottom, dwidth, decorators=[dpm.MenuDecorator(x=23, y=13, decorator = "*", colors="|16|12"), dpm.MenuDecorator(x=35, y=13, decorator = "*", colors="|16|12")], scrollbar=True, blockscroll=True, isselectable=False)
+    menuDesc.onAction = filedescriptionsOnAction
+    menuDesc.onEnter = filedescriptionsOnEnter
+    menuDesc.onLeave = filedescriptionsOnLeave
+    
+    menu_list.add(menuFg)
+    menu_list.add(menuFb)
+    menu_list.add(menuFi)
+    menu_list.add(menuDesc)
+    
+    menu_list.init()
+    menu_list.draw_menus()
+    
+    while not bbs.shutdown():# and not keypressed():
+        bbs.write("|PB")
+        marquee_index = 0
+        count = 0
+        while not bbs.keypressed():
+            
+            if count % 7 == 0:
+                marquee_index = menu_list.draw_marquees(marquee_index)
+            count += 1
+            if flush_stdio:
+                try:
+                    bbs.flush()
+                except:
+                    pass
+            bbs.delay(30)
+
+        char, extended = bbs.getkey()
+        
+        if extended:
+            if char == KEY_UP:
+                menu_list.scroll(dpm.ScrollDir.up)
+            elif char == KEY_DOWN:
+                menu_list.scroll(dpm.ScrollDir.down)
+            elif char == KEY_RIGHT:
+                menu_list.next_menu()
+            elif char == KEY_LEFT:
+                menu_list.prev_menu()
+            elif char == KEY_PGUP:
+                menu_list.scroll(dpm.ScrollDir.up_page)
+            elif char == KEY_PGDN:
+                menu_list.scroll(dpm.ScrollDir.down_page)
+            elif char == KEY_HOME:
+                menu_list.scroll(dpm.ScrollDir.home)
+            elif char == KEY_END:
+                menu_list.scroll(dpm.ScrollDir.end)
+            else:
+                pass
+        else:		
+            if char == KEY_ESCAPE:
+                dpm.Utils.draw_box(1, color="|04")
+                bbs.write("|[X04|[Y11")
+                if bbs.getyn("|08Are you sure you want to exit? :", 11):
+                    break
+                else:
+                    redraw()
+            elif char == KEY_SPACE:
+                if readonly:
+                    show_note("|15Readonly mode: You must have access to download!")
+                else:
+                    menu_list.action({"Add":download_queue})
+            elif char == KEY_TAB:
+                menu_list.next_menu()
+            elif char == 'v' or char == 'V':
+                menu_list.action({"View":None})
+            elif char == 'r' or char == 'R':
+                # Redraw because some FILEID.DIZ's screw up the screen
+                redraw()
+            elif char == 'q' or char == 'Q':
+                if readonly:
+                    show_note("|15Readonly mode: You must have access to download!")
+                else:
+                    menu_list.action({"Show":download_queue})
+            elif char == KEY_QMARK:
+                draw_help("filebrws_help")
+                # help_displayed = True
+            else:
+                pass
+
+        menu_list.draw_menus()
+        if flush_stdio:
+            bbs.flush()
+        
+def usage():
+    bbs.writeln(" |15FileBrowser for Mystic BBS 1.12 A45 (Linux) / A46 (Windows)")
+    bbs.writeln(" Usage: |14dpr_flbr.mpy <arg>")
+    bbs.writeln(" |15Only the first argument specified is used.")
+    bbs.writeln(" Args:")
+    bbs.writeln("   --readonly      : Disable downloading")
+    bbs.writeln("   --help          : Display this notice")
+    bbs.writeln("|CR |15Requires the following Python packages:")
+    bbs.writeln("   |07pip install dprMenus")
+    bbs.write("|PA")
+
+# Main
+args = bbs.param_str(1)
+show_help = False
+
+# Check version. Will not work on Windows <A46 due to flush bug
+
+try:
+    build = int(bbs.mci2str("VR").split(' ')[1][1:])
+    if build >= 46:
+        flush_stdio = True
+except ValueError:
+    bbs.writeln("Unable to determine build, defaulting to < A46|PA")
+
+if os.name == 'nt' and build < 46:
+    bbs.writeln("|04Mystic Version Error: |03Unable to run on Mystic 1.12 version < A46 (Windows)")
+    bbs.writeln("|08You have Mystic |VR")
+    bbs.write("|PA")
+elif os.name == 'posix' and build < 45:
+    bbs.writeln("|04Mystic Version Error: |03Unable to run on Mystic 1.12 version < A45 (Linux) ")
+    bbs.writeln("|08You have Mystic |VR")
+    bbs.write("|PA")
+else:
+    if args is None:
+        pass
+    elif args == "--readonly":
+        readonly = True
+    elif args == "--help":
+        show_help = True
+
+    if import_success and not show_help:
+        get_keys()
+    else:
+        usage()
+# Reset ICE colors
+#write("|CL\033[?33l")
+# Use ICE Colors, currently disabled, will add in future
+#write("|CL\033[?33h")
+# Regex to strip ansi escapes, save for later:
+# ansi_regex = r'\x1b(' \
+#              r'(\[\??\d+[hl])|' \
+#              r'([=<>a-kzNM78])|' \
+#              r'([\(\)][a-b0-2])|' \
+#              r'(\[\d{0,2}[ma-dgkjqi])|' \
+#              r'(\[\d+;\d+[hfy]?)|' \
+#              r'(\[;?[hf])|' \
+#              r'(#[3-68])|' \
+#              r'([01356]n)|' \
+#              r'(O[mlnp-z]?)|' \
+#              r'(/Z)|' \
+#              r'(\d+)|' \
+#              r'(\[\?\d;\d0c)|' \
+#              r'(\d;\dR))'
+#ansi_escape = re.compile(ansi_regex, flags=re.IGNORECASE)

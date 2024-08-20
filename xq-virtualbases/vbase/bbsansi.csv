@@ -1,0 +1,10 @@
+PABLO DRAW ;group;20
+Windows;link;20;http://download.picoe.ca/pablodraw/windows/PabloDraw_Setup.exe;requires windows xp and up
+Linux;link;20;http://download.picoe.ca/pablodraw/3.2/PabloDraw-3.2.1.zip;requires MONO or NET 4.0
+Mac;link;20;http://download.picoe.ca/pablodraw/3.2/PabloDrawMac-3.2.1.zip;requires OS X 10.6
+
+MOEBIOUS ;group;20
+Mac;link;20;http://www.andyh.org/moebius/M%C5%93bius.dmg;http://www.andyh.org/moebius
+Windows;link;20;http://www.andyh.org/moebius/M%C5%93bius%20Setup.exe;http://www.andyh.org/moebius
+Debian/Ubuntu;link;20;http://www.andyh.org/moebius/M%C5%93bius.deb;http://www.andyh.org/moebius
+Source Code;link;20;https://github.com/blocktronics/moebius

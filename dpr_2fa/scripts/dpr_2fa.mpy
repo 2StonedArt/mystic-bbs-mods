@@ -1,0 +1,308 @@
+# Version 0.3.0
+# - Added ANSI validator and otp_ansi.ans display file.
+# - Fixed bypass hangup if fail validation check missing if statement ...
+
+# - Note on NTP sync timer interval: 
+#	Windows: Navigate to HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\services\W32Time\TimeProviders\NtpClient
+#   Change SpecialPollInterval to desired time in seconds. 3600 seconds = 1 hour, should be plenty fast.
+#   Linux: See: https://blog.marquis.co/configuring-ntp-server-on-ubuntu/ 
+# Version 0.3.1
+# - Added ANSI toggle flag to use either prompt or ANSI for validate/enable
+# - Refactored to reuse validators within a validate or enable call
+# - Added debug flag to allow for ESCAPE key exiting from the validation routine
+
+import mystic_bbs as bbs
+import_success = True
+import time
+# pyotp
+try:
+	import pyotp as otp
+except ImportError:
+	import_success = False
+	bbs.writeln("|12Import error! Please \"pip install pyotp\"")
+# qrcode
+try:
+	import qrcode
+except ImportError:
+	import_success = False
+	bbs.writeln("|12Import error! Please \"pip install qrcode[pil]\"")
+
+# Keys
+KEY_ESCAPE    = chr(27)
+KEY_ENTER     = chr(13)
+KEY_LF        = chr(10)
+KEY_BACKSPACE = chr(8)
+KEY_TAB       = chr(9)
+
+# Mystic BBS flag to use for OTP indication.
+OTP_USER_FLAG = "O"
+# Turn this off if you don't want to hangup after failed validation. Also good for debugging
+hangup = False
+# Allow local login bypass for 2FA? If True, you won't be able to test 2FA during local
+# login. Toggle it!
+allow_local_bypass = False
+# Local login IP string or part of it. Say "192.168.1" should work if that's you LAN subnet
+local_ip_slice = "192.168.1"
+# BBS name to use in QRCode, limit to 10 characters to reduce QRCode size. Too many characters may
+# overrun the number of viewable screen lines and cause the QR to not fit on the screen.
+bbs_name = "CoolBBS"
+# Sysop name or handle for mailto when authentication has failed
+sysop_name = "Sysop"
+# Set to True to use ansi validator, False for prompt validator
+valansi = True	
+# Allow ESCAPE key to exit by setting debug = True
+debug = True
+# Create BBS QR class inherited from QRCode and add method for QR ANSI
+class bbs_qr(qrcode.QRCode):
+	def get_ascii(self):
+		if self.data_cache is None:
+			self.make()
+
+		modcount = self.modules_count
+		# Space character and upper half block, lower half block, full block
+		codes = [chr(32), chr(223), chr(220), chr(219)]
+
+		def get_module(x, y):
+			if min(x, y) < 0 or max(x, y) >= modcount:
+				return 0
+			return self.modules[x][y]
+		# This is where we make the rows and columns of the QR
+		qr_ansi = ""
+		for r in range(-self.border, modcount + self.border, 2):
+			for c in range(-self.border, modcount + self.border):
+				pos = get_module(r, c) + (get_module(r + 1, c) << 1)
+				qr_ansi += codes[pos]
+			# Add a nice split character for re-mapping 1D to 2D 
+			qr_ansi += '*'
+		return qr_ansi
+
+def otp_disable():
+	if bbs.getyn("|07Are you sure you want to disable 2FA? : ", False):
+		# Disable 2FA flag
+		bbs.menucmd("-F", "-" + OTP_USER_FLAG)
+		# Attempt to hide experinece by savings screen then restoring
+		bbs.write("|SS")
+		# Clear user option 3 of Secret Key but putting a backspace and enter in buffer
+		bbs.stuffkey(chr(8) + chr(13))
+		# Edit user option 3 as per Mystic DOC
+		bbs.menucmd("GE", "26")
+		# Restore screen as to hide the stuff key. Just for cleanliness.
+		bbs.write("|RS")
+		# Indicate to user
+		bbs.writeln("|072-Factor Authentication disabled! |DE|DE")
+
+# OTP enablement method. Generates a QRCode and verifies OTP before stuffing the secrete
+# key in user optional field 3.
+def otp_enable(valansi=False):
+	if bbs.getyn("|07Would you like to setup 2-Factor Authentication? : ", True):
+		# Get the logged in user
+		user = bbs.getuser(0)
+		# Generate the key
+		key = otp.random_base32()
+		# Show user the key
+		bbs.writeln("|CL|08The following key is valid with any TOTP 2FA application.")
+		bbs.writeln("You secret key is: |12" + str(key))
+		# This is a proper TOTP string for QR authenticator applications
+		string = 'otpauth://totp/' + bbs_name + ':' + user['handle'] + '?secret=' + str(key) + '&issuer=' + bbs_name
+
+		# Construct the qrcode factory
+		qr = bbs_qr(version=1,
+					error_correction=qrcode.constants.ERROR_CORRECT_L,
+					box_size=10,
+					border=0)
+		qr.add_data(string)
+		qr.make(fit=True)
+		#qr_ans = qr.get_ascii()
+		
+		bbs.writeln("|08Your QRCode is: |15")
+		# Reshape 1D to 2D
+		ansi_2d = qr.get_ascii().split('*')
+
+		for line in ansi_2d:
+			# Print it centered on user's screen
+			bbs.writeln("|[X" + str(int(len(ansi_2d[0]) / 2)).zfill(2) + line)
+
+		bbs.writeln(
+			"|08Some TOTP 2FA apps are: |13Authy, Microsoft Authenticator, Google Authenticator")
+		bbs.writeln(
+			"|08Press |07any key |08when once you have scanned the QRCode or entered your |12secret key|PN")
+		# Define the time-based one time password TOTP using the secret key
+		#totp = otp.TOTP(key)
+		validated = False
+		# Before we can set the params on the BBS to enable 2FA, we want to ensure the user
+		# can actually validate. If they fail, 2FA is NOT enabled.
+		#bbs.write("|15Please enter OTP: ")
+		#input = bbs.getstr(11, 6, 6, "")
+		if valansi is True:
+			validated = otp_validate_ansi(key, hangup_if_fail=False)
+		else:
+			bbs.writeln("|CRBefore we can enable 2FA, you must validate!")
+			bbs.writeln("")
+			validated = otp_validate(key, hangup_if_fail=False)
+		if validated is True:
+			bbs.writeln(
+				"|15Validated|08, 2FA enabled!|CR|08You will be required to use this when logging on.|PA")
+			# Attempt to hide by savings screen then restoring
+			bbs.write("|SS")
+			# Stuff it in User Option 3, which should be hidden
+			# from the user and unused on login
+			bbs.stuffkey(key + chr(13))
+			bbs.menucmd("GE", "26")
+			# Restore screen as to hide the stuff key. Just for
+			# cleanliness.
+			bbs.write("|RS")
+			# Set flag for indicating user has 2FA enabled
+			bbs.menucmd("-F", "+" + OTP_USER_FLAG)
+			
+   		return validated
+
+# Validation method. Retrieves user's OTP secret key from the User Option 3 that was stuffed
+# during enablement
+def otp_validate_ansi(secret, hangup_if_fail=False):
+	# Generate the TOTP from secret
+	totp = otp.TOTP(secret)
+
+	# Here we can bypass local login 2FA for Sysops. Just make sure your ip in the following
+	# string will match the IP you login with
+	if allow_local_bypass:
+		if local_ip_slice in bbs.mci2str("UY") or "local" in bbs.mci2str("UY"):
+			bbs.writeln("User validated because auto local bypass!|DE|DE")
+			return
+	# Render ansi
+	bbs.write("|CL|DFotp_ans|")
+	if debug is True:
+		bbs.write("|[X05|[Y02|04Debug mode on, hit |15Escape |04to exit!")
+	validated = False
+	key_buffer = []
+	x_locs = ["|[X24","|[X30", "|[X36", "|[X44", "|[X50", "|[X56"]
+	y_loc = "|[Y10"
+	xy_status_loc = "|[X37|[Y14"
+	xy_exit_loc = "|[X00|[Y17"
+	bbs.write(x_locs[0] + y_loc)
+	fail_count = 0
+	while not bbs.shutdown():
+		if fail_count is 3:
+			validated = False
+			break
+		char, extended = bbs.getkey()
+		if extended:
+			pass
+		elif char is KEY_ENTER:
+			if totp.verify(''.join(key_buffer)):
+				bbs.writeln(xy_status_loc + "|15SUCCESS|DE" + xy_exit_loc)
+				validated = True
+				break
+			bbs.writeln(xy_status_loc + "|04FAILURE|DE|DE")
+			bbs.writeln(xy_status_loc + "       ")
+			for item in x_locs:
+				bbs.write(item + y_loc + ' ')
+			bbs.write(x_locs[0] + y_loc)
+			del key_buffer[:]
+			fail_count += 1
+		elif char is KEY_ESCAPE:
+			if debug is True:
+				bbs.write(xy_exit_loc)
+				return
+		elif char is KEY_BACKSPACE:
+			if len(key_buffer) > 0:
+				bbs.write(x_locs[len(key_buffer)-1] + ' ')
+				bbs.write(x_locs[len(key_buffer)-1])
+				del key_buffer[-1]
+		elif char is KEY_TAB:
+			pass
+		elif len(key_buffer) < 6:
+			key_buffer.append(char)
+			bbs.write(x_locs[len(key_buffer)-1] + y_loc + "|04" + char)
+			if len(key_buffer) < 6:
+				bbs.write(x_locs[len(key_buffer)] + y_loc)
+			else:
+				bbs.write(x_locs[len(key_buffer)-1] + y_loc)
+
+	# Failed 2FA
+	if not validated:
+		bbs.writeln(xy_exit_loc + "|CR|12Failed to validate!")
+		if bbs.getyn("|07Would you like to notify |08" + sysop_name + "? : ",True):
+			bbs.menucmd("MW","/to:" + sysop_name + " /subj:Failed_to_authenticate_2FA!")
+		bbs.writeln("|15We are unable to validate you. Please try again or contact " + sysop_name + "|15!|DE|DE")
+		# Hangup immediately. You could go to another menu if you want in your login
+		# workflow since the user is technically authenticated with Mystic.
+		if hangup_if_fail:
+			bbs.menucmd("GI", "")
+
+	return validated
+
+# Validation method. Retrieves user's OTP secret key from the User Option 3 that was stuffed
+# during enablement
+def otp_validate(secret, hangup_if_fail=False):
+	# Generate the TOTP from secret
+	totp = otp.TOTP(secret)
+
+	# Here we can bypass local login 2FA for Sysops. Just make sure your ip in the following
+	# string will match the IP you login with
+	if allow_local_bypass:
+		if local_ip_slice in bbs.mci2str("UY") or "local" in bbs.mci2str("UY"):
+			bbs.writeln("User validated because auto local bypass!|DE|DE")
+			return
+  
+	validated = False
+	for i in range(0,3):
+		bbs.write("|CR|15Please enter OTP: ")
+		input = bbs.getstr(20, 6, 6, "")
+		if input is not None and input.isdigit():
+			if totp.verify(input):
+				bbs.writeln("Success!|DE")
+				validated = True
+				break
+		bbs.writeln('Invalid OTP, try again|DE')
+
+	# Failed 2FA
+	if not validated:
+		bbs.writeln("|CR|12Failed to validate!")
+		if bbs.getyn("|07Would you like to notify |08" + sysop_name + "? : ",True):
+			bbs.menucmd("MW","/to:" + sysop_name + " /subj:Failed_to_authenticate_2FA!")
+		bbs.writeln("|15We are unable to log you in. Please try again!|DE|DE")
+		# Hangup immediately. You could go to another menu if you want in your login
+		# workflow since the user is technically authenticated with Mystic.
+		if hangup_if_fail:
+			bbs.menucmd("GI", "")
+	
+ 	return validated
+
+def usage():
+	bbs.writeln(" |152-Factor Authentication for Mystic BBS 1.12")
+	bbs.writeln(" Usage: |14mys_2fa.mpy <arg>")
+	bbs.writeln(" |15Only the first argument specified is used.")
+	bbs.writeln(" Args:")
+	bbs.writeln("   --enable        : Enable OTP 2FA")
+	bbs.writeln("   --disable       : Disable OTP 2FA")
+	bbs.writeln("   --validate      : Validate OTP 2FA")
+	bbs.writeln("|CR |15Requires the following Python packages:")
+	bbs.writeln("   |07pip install pyotp")
+	bbs.writeln("   |07pip install qrcode[pil]")
+	bbs.write("|PA")
+
+# Main
+if bbs.param_count() < 1:
+	usage()
+elif import_success:
+	args = bbs.param_str(1)
+
+	if args == "--enable":
+		otp_enable(valansi)
+	elif args == "--disable":
+		otp_disable()
+	elif args == "--validate":
+		bbs.getuser(0)
+		# Retrieve previously saved key
+		secret = bbs.mci2str('U3')
+		if secret is None or len(secret) < 16:
+			bbs.writeln("|04Error: |08OTP key associated with your account is missing or corrupt. |CRPlease disable and re-enable 2-FA!|PA")
+		else:
+			if valansi is True:
+				otp_validate_ansi(secret, hangup)
+			else:
+				otp_validate(secret, hangup)
+	else:
+		usage()
+else:
+    usage()
