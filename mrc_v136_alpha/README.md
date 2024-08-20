@@ -1,16 +1,86 @@
-Ú ---ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ---Ä-- -- ¿
-³ // Phenom Productions presents...   ³
-Ã----ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ--- -- -  ´
-³  ÜÜÜÜÜ  ÜÜÜÜ Ü  ÜÜÜÜÜÜÜ  ÜÜÜÜÜÜ  ßß ³
-: ß°Üß  ßÜÜß Üß° ßÜßßßÛ²Ü ßÜß² °   ßÛ :
-. ÛÛÛ  ÛÛÛ   ÛÜÛ      °ÛÛ Û²Û   ÜÛ °ß .
-° °ÛÛ  °ÛÛ ° °ÛÛ ßÜÛßßßßß °ÛÛ  ÛÛ² ÜÜ°
-: °ÛÛ  ßßß   °ÛÛ  ßÜÛßÜÜÜ °Ûß  ßßÛ ÜÜ :
-³  Üß ::: ÜÜ ÛÛÛ ::::ßÜÜß Û ÜÜÜÜß:::: ³
-³ ß ---ÄÄ ÜÛÜÛÛÛ ÄÄÄÄÄÄÄÄÄßÜßßÄÄ--- Ä ³
-³           ßÜßÛ [x]win[x]linux[x]pi  ³
-ÀÄ-------ÄÄÄÄÄßÜ ÄÄÄÄÄÄÄÄÄÄ---- -- ---Ù
-³   m u l t i - r e l a y - c h a t   ³
-Ã---- -- -                   - -- ----´
-³ stackfault<phenom>    version 1.3.6 ³
-ÀÄ--- -- -                   - -- ----Ù
+           Ãœ                            Ãœ
+          Ã›      ÃŸÃœ  ÃŸÃœ  ÃÃ  ÃœÃŸ  ÃœÃŸ      Ã›    Ãš------------------------------------Â¿
+          ÃŸÃœ      ÃŸÃ›Ãœ ÃŸÃŸ ÃŸÃŸ ÃŸÃŸ ÃœÃ›ÃŸ      ÃœÃŸ    :     filename: PN-MRC136-ALPHA.ZIP  :
+         ÃŸÃœ ÃŸÃœ     Ã›ÃœÃœÃ›Ã›Ã›Ã›Ã›Ã›Ã›Ã›ÃœÃœÃ›  sM ÃœÃŸ ÃœÃŸ           author: StackFault
+         Â° Ã› \Ã›   Ã›ÃœÃœÃœÃœ ÃŸÃ›Ã›ÃŸ ÃœÃœÃœÃœÃ›   Ã›/ Ã› Â°     release date: 07/23/2024
+        Â°ÃœÃŸ  ÃœÃŸ ÃœÃ›Â²ÃŸÃœÃœÃŸÃŸÃœÃœÃœÃœÃŸÃŸÃœÃœÃŸÂ²Ã›Ãœ ÃŸÃœ  ÃŸÃœÂ°         version: 1.3.6 Alpha
+        Â±/ ÃœÃŸ   ÃŸÃœÃœÃŸÃŸÃŸÃŸÃŸ Ã›Ã› ÃŸÃŸÃŸÃŸÃŸÃœÃœÃŸ   ÃŸÃœ \Â±  : bbs software: MYSTIC 1.12 A45+     :
+        Â²/Ã›Ã›    Ã›     X  Ã›Ã›  X     Ã›    Ã›Ã›\Â²  Ãƒ------------------------------------Â´
+        Ã›/Ã›Ã›   ÃÃ›Ã›ÃœÃœÃœ    Ã›Ã›    ÃœÃœÃœÃ›Ã›Ã   Ã›Ã›\Ã›  : This an any ALL PHENOM PRODUCTION  :
+        ÃŸÃœÃŸÃ›Ãœ Ã› Ã›Ã›Ã›Ã›Ã›Ã›Ã›Ã›Â²ÃŸÃŸÂ²Ã›Ã›Ã›Ã›Ã›Ã›Ã›Ã› Ã› ÃœÃ›ÃŸÃœÃŸ    releases can be found on the
+          \ ÃŸÃŸÃ› Â²Ã›  ÃŸÃœÃ›Ã›Ã›Ã›Ã›Ã›Ã›Ã›ÃœÃŸ  Ã›Â² Ã›ÃŸÃŸ /      ALL ArakNet Bulletin Board Systems
+             ÃŸÃ›      Ã› Ã›ÃŸÃ›Ã›ÃŸÃ› Ã›      Ã›ÃŸ         and Distribution Sites.
+                                                You can also find them on their
+             ÃšÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Â¿        official website at:
+        /\/\/:    PHENOM PRODUCTIONS   :\/\/\ : https://www.phenomprod.com         :
+        :    Ã€Ã„Ã„Ã„Ã„Ã„Ã„Ãº( EST. 2018 )ÃºÃ„Ã„Ã„Ã„Ã™    : Ã€Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã™
+        Ãš--------------------------------------------------------------------------Â¿
+        :  release name: Multi Relay Chat                                          :
+        >> -----------------------------------------------------------------------
+        os type: [X] WINDOWS : [X] 32bit [X] 64bit
+        -------- [X] LINUX   : [X] 32bit [X] 64 bit
+                 [ ] MACOS
+                 [ ] AMIGA
+                 [ ] C64
+                 [ ] OTHER :
+        >> -----------------------------------------------------------------------
+        description:
+        ------------
+        Multi Relay Chat is a communication platform allowing users from BBSes
+        all around the world to communicate seamlessly together. Multi Relay Chat
+        is also moving toward crossplatform integration where many BBS platforms
+        will be able to communicate with it. Clients for many other BBS systems
+        are under development and will be available soon.
+        * * THIS RELEASE IS CONSIDERED ALPHA - FOR TESTING & FEEDBACK * * *
+        
+        More information is available on my wiki at the following address:
+                      https://bbswiki.bottomlessabyss.net
+        >> -----------------------------------------------------------------------
+        archive includes:
+        -----------------
+         >> General
+         ----------
+         release-info.asc  : Detailed info of this release <this file>
+              upgrade.asc  : The upgrade guide for this release.
+         installation.asc  : The installation guide for this release.
+            changelog.asc  : A log of all the changes to this release.
+         phenom-intro.ans  : About PHENOM PRODUCTIONS.
+        phenom-member.asc  : PHENOM PRODUCTIONS Membership Registration Form
+              file_id.diz  : ASCII description <for BBS use only>
+              file_id.ans  : ANSI description <for BBS use only>
+         ..................................................................
+        >> Code / Config Files:
+        -----------------------
+        mrc_client.py                 : The Python client multiplexer (Python 2 & 3)
+        mrc_config.py                 : The Python client configuration file
+        mrc_client.mps                : The Mystic Chat interface MPL
+        mrc_stat1.mps                 : MRC applet sample to display stats in BBS
+        mrc_stat2.mps                 : MRC bar sample to display stats in BBS
+        mrctheme-original.default.ini : MRC theme configuration file for 80 cols
+        mrctheme-original.132x36.ini  : MRC theme configuration file for 132x36 term
+        mrctheme-original.132x51.ini  : MRC theme configuration file for 132x51 term
+        mrctheme-original.132x59.ini  : MRC theme configuration file for 132x59 term
+        mrctheme-original.160x44.ini  : MRC theme configuration file for 160x44 term
+        mrctheme-original.160x59.ini  : MRC theme configuration file for 160x59 term
+        mrctheme-minimal.default.ini  : MRC theme configuration file for 80 cols
+        mrctheme-minimal.132x36.ini   : MRC theme configuration file for 132x36 term
+        mrctheme-minimal.132x51.ini   : MRC theme configuration file for 132x51 term
+        mrctheme-minimal.132x59.ini   : MRC theme configuration file for 132x59 term
+        mrctheme-minimal.160x44.ini   : MRC theme configuration file for 160x44 term
+        mrctheme-minimal.160x59.ini   : MRC theme configuration file for 160x59 term
+        mrc-original.default.ans      : Original theme skin (80 columns)
+        mrc-original.132.ans          : Original theme skin (132 columns)
+        mrc-original.160.ans          : Original theme skin (160 columns)
+        mrc-minimal.default.ans       : Minimal theme skin (80 columns)
+        mrc-minimal.132.ans           : Minimal theme skin (132 columns)
+        mrc-minimal.160.ans           : Minimal theme skin (160 columns)
+        mrcstat.ans                   : MRC applet sample ANSI
+           >> Prerequisites:
+           -----------------
+           - Mystic 1.12 A45+
+           - Mystic 1.12 A47+ for wide-screen support
+           - Python 2.7.12 or Python 3.6+
+        :                                                                          :
+        Ãƒ--------------------------------------------------------------------------Â´
+        : created: march 5, 2019                           modified: july 23, 2024 :
+        Ã€--------------------------------------------------------------------------Ã™
