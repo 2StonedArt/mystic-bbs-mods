@@ -1,0 +1,343 @@
+    .                                                                     .
+    |        ...a dEMONIC pRODUCTIONS tWENTY tWENTY tWO rELEASE...        |
+   /|                                                                     |\
+  / :                                                                   jp! \
+  \  \                                                                   /  /
+   \ '\                            ,       ,                            /` /
+    \ '\__                      __/|___ ___|\__                      __/` /
+     \    `------,___        ,-, / |   '   | \ ,-,        ___,------`    /
+      \'           ' \___  ,- /|_`-',  .  ,`-`_|\ -.  ___/ `           ./
+       `---/____|_       \_  / | - /|  :  |\ - | \  _/       _|____\---'
+                  \_,    ' \_`-'  / |  |  | \  `-`_/ `    ,_/
+                    \_,      \   /  |  :  |  \   /      ._/
+                      \,      \  `--'  .  `--`  /      ,/
+                    /  |      _\   ,_______.   /_      |  \
+               ,_   \  |-      | .___________, |      -|  /   _,
+                \`-,_|  \-    -|     ,___.     |-    -/  |_,-`/
+                 \  `:  |  ____/   ._______,   \____  |  :`  /
+  ,-------------- \     `-'     -__   ___   __-     `-`     / --------------,
+  | ,=========== / \  /`           _  . .  _           `\  / \ ===========. |
+  | | ########## \_ \ \ ,_,-----,     : :     ,-----,_, / / _/ ########## | |
+  | `-==========   \  :\ /  .:::.`----'.'----`,:::,  \ /:  /  ============' |
+  | | ,--- -- -     | ,  |  `::::'  __/:\__  `::::'  |  , |     - -- ---, | |
+  | | |             |/|   `--,___,-'  _._  '-,___,--`   |\|             | | |
+  | | |             '/              ./   \.              \`             | | |
+  | |                \__.      .    |     |    .      .__/                | |
+  | | |                 \__,--'`\_  | \./ |  _/`'--,__/                 | | |
+  | |                      ,    |   \_____/   |    ,                      | |
+  | | `                   / .  ,               ,  . \                   ' | |
+  | |                    /__:| | | | ,   , | | | |:__\                    | |
+  | |                   '   | \| | | | | | | | |/ |   `                   | |
+  | |                       |  \-\ |_|_|_|_| /-/  |                       | |
+  | |                       `, |\_`'       `'_/| ,'                       | |
+  | | ,                       \ ` /|-,_ _,-,\ ` /                       . | |
+  | |                         /_  \| | | | |/  _\                         | |
+  | | |                      '  \, ` ` . ` ` ,/  `                      | | |
+  | |                             \    |    /                             | |
+  | | |  __,---,___ ___,---,_______`--' `--' --,---,___,---,___,---,    | | |
+  | | |  \__       |       |           |      _|       |   |       |    | | |
+  | | `--  |   |   |   |   |_  .   .   |   .  \_   ,   |===|   |   |__--` | |
+  | ,===== |   |   :   |____/  |   |   .   |   |   |   :  _|   |_____/ ===, |
+  | | #### |   |        _/_|_  |   |       |   :   |      \_   |    _\ ## | |
+  | `===== |   |       |   _/  |   |   .   |       |       :   |   |   ===' |
+  `------- |   |   .   |   :   |   |   :   |   .   |   .       |   | -------'
+         __|   |   :   |       |   |   |   |   :   |   :   .   |   |
+         \_        |   |   .   |___|   |_      |   |   |   |       |
+           |___,---'---,___|---'   |____/__,---'---|___|---'---,___|
+
+       <<<    p    R    O    D    U    C    T    I    O    N    S    >>>
+
+-------------------------------------------------------------------------------
+ [ rELEASE iNFO ]
+-------------------------------------------------------------------------------
+ 
+ * Inter BBS Database
+ * Mystic MPY mod
+ * Code and art by XQTR
+ * Released 11/2023
+ 
+-------------------------------------------------------------------------------
+ [ dOCUMENTATION ]
+------------------------------------------------------------------------------- 
+ 
+ // What is it?
+ 
+ > It's a BBS Database, that self populates its data from two sources. 
+ The first source is the Message Bases of the Echonets your BBS is 
+ connected to! The second one, is special data packets that the MOD 
+ sends, to selected echo areas, with information about your BBS. Even 
+ if you don't want to send these special packets, the MOD can gather 
+ BBS information from the echo nets. No need for you to fill anything.
+ 
+ > But it's advisable to send the special packets, called "Pings" from 
+ now on. A Ping contains information, you provide, about your BBS, like 
+ location, web page, how many calls it has and more. This way, a 
+ visitor that checks your BBS info, through the mod, can see that you 
+ have a BBS with many calls (for example) and also connect to it, or 
+ because he saw that you have many interesting File Areas, worth 
+ checking.
+ 
+ > The mod, sends info/data, that only you provided and in no 
+ circumstance, sends other info. There is a Configuration script, that 
+ you can easily use to fill the information you want to provide.
+ 
+ 
+ // How it works?
+ 
+ > The mod uses a SQLite database to store all the data. This way, when 
+ you use the main mod script, you can use any SQL query to share the 
+ information to your users/visitors. As an example you can see the 
+ default configuration, but you can also write anything you like or 
+ think that would be useful to your visitors.
+ 
+ > The mod is actually a sum of one big/main script and some other 
+ smaller. In detail:
+ 
+   - BBSDB    : Main script.
+   - BBSDBLOG : The script that sends the Ping messages.
+   - BBSDBCFG : Configuration script.
+   - BBSDBSQL : The scrape tool to gather BBS information from the echo 
+                areas.
+   - BBSDBCOM : Common functions used by the other scripts.
+   - BBSDBVAR : Variables stored, that are needed by the mod.
+ 
+ > You use the BBSDBLOG script to send automatic Ping messages, for 
+ other BBSes to catch/read and fill their databases. So, if many BBSes 
+ use this mod, the database will be more complete and accurate.
+ 
+ > You don't have to send too many Ping messages. One per one or two 
+ days is enough, or you could send them, while a user logs into your 
+ BBS.
+ 
+ > With the BBSDBSQL script, we can fill the database by scraping as 
+ many echoareas you like, for telnet addresses. This script uses a 
+ telnet Regex and any match, is added into the database. It's not an 
+ accurate way, for gathering BBS information, but still it helps a lot 
+ to have an informed BBS database. 
+ 
+ > The regex for searching BBS address, needs the BBS port to be passed 
+ in the telnet address (ex. mybbs.com:23), otherwise it discards it. 
+ It's just a regex, not an AI :) So it would be a good practice to fill 
+ your complete telnet address (address:port), in the origin line of 
+ your BBS messages, as this scrape tool, searches for telnet addresses 
+ in the Origin line of each post.
+ 
+ // Installation...
+ 
+ The installation procedure is a bit different than other Mystic mods. 
+ All the scripts this mod uses are inside the XQBBSDB folder, which 
+ must be inside Mystics SCRIPT folder. Even the main script (BBSDB) is 
+ inside the XQBBSDB folder. So, what you have to do?
+ 
+ 1. Unzip the archive inside Mystics SCRIPTS folder, for your theme.
+    You can also use the GIT repo, with the latest version of the mod 
+    and install the mod, with:
+    
+      git clone https://github.com/xqtr/xqbbsdb
+      
+    Make sure to run the command when you are inside the SCRIPT folder 
+    of Mystic.
+    
+ 2. Launch Mystic Configuration Tool and create a Menu Command, in your 
+    proffered Menu. The options for the command should be something 
+    like this:
+    
+  
+    █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ Command Options ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▄
+    █                                                                █
+    █ Command    │ (GY) Execute Python Module                        █
+    █ Data       │ /home/user/mystic/.../scripts/xqbbsdb/bbsdb       █
+    █ Access     │                                                   █
+    █ Grid Event │ Selected                                          █
+    █                                                                █
+    ▀▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
+    
+    To run the script, you have to add the full path and filename of 
+    the script and not only the filename, as it is used in other Mystic 
+    mods. The dots in the path above
+    
+    /home/user/mystic/.../scripts/xqbbsdb/bbsdb
+    
+    ...are just to keep this path presentation short, but in your 
+    system, you have to write the full path.
+    
+  3. Run the mod from the menu you added it and press the C key to 
+     configure it. This Configuration Wizard will guide you in the 
+     process ;)
+  
+  If you want to keep things simple, you are done! You can check the 
+  menu launch the mod and explore it. Press the H key to see additional 
+  information. You can have and run the mod this way, but it wont work 
+  in its full potential.
+  
+  Whenever you run the mod you can press the S key, to scrape message 
+  nets for additional BBSes and/or press the P to send information 
+  about your BBS, to other BBSes that also use the mod.
+  
+  But i advise to customize things a bit more, so sending Ping messages 
+  it done automatically. For sending Ping messages, the mod uses the 
+  BBSDBLOG script. You execute this script, whenever a user logs into 
+  your BBS, for example or when you (the sysop) log in. Thus, sending 
+  frequent and updated Ping messages. To do this, edit your PRELOGIN 
+  menu and add a GY command, executing that script. Again use the full 
+  path and file name and NOT just the filename.
+  
+  The script is "invisible" to users, nothing is displayed when it 
+  runs, so it wont affect the log in experience of your visitors.
+  
+  Also... for automating the scrape process, you can execute the scrape 
+  tool (BBSDBSQL) when the sysop logs in, or when the sysop is 
+  accessing the main mod etc. You can also do that from within the main 
+  script, as said previously.
+  
+ 
+ // Configure
+ 
+  To configure the mod, you can:
+  
+  1. Edit the script files
+  2. Edit the ANSI files
+  3. Edit the configuration file, named XQBBSDB.CFG and located in 
+     Mystics DATA folder. Make sure, that you have run the 
+     Configuration Wizard of the mod first, to create the file, 
+     otherwise you wont find anything. This files is in JSON format and 
+     is readable. You can edit stuff as you like. Always back it up, 
+     before editing to make sure you don't lose anything.
+     
+            
+ // Updating...
+  
+  As written above, you can install the mod from my GITHUB repo. So to 
+  update the mod, you can just give the command:
+  
+  git pull
+  
+  ...from withing the XQBBSDB folder and the mod will update all of its 
+  main scripts, but it wont touch/edit the configuration file nor the 
+  SQLite database file, which are saved inside the DATA folder.
+  
+  If you have maid changed to the themes or other files, of the mod, 
+  perhaps GIT will not let you update it. In that case, create a backup 
+  of your customized version, update or make a clean install of the mod 
+  and then put back your customized files. You are done! Nothing else 
+  will be affected.
+  
+ // The LIST.CSV file...
+ 
+  Here is the good part. The mod uses a SQLite database, which we can 
+  use to filter results. The menu list you see when you are running the 
+  mod, is defined by the LIST.CSV file. In this file, you can insert 
+  any SQL query to filter results and present a list of BBS, that the 
+  user/visitor may find helpful.
+  
+  You can add as many categories and menu options you want, with unique 
+  SQL queries, with specific ACCESS level (for users, Sysop etc.) and 
+  also display ANSI graphics or details about the menu entry. Lets 
+  explain it a bit.
+  
+  To define a group you add a line like this:
+  
+  name      ;group,acs;-1
+  ALL BBSes ;group;20;-1
+  
+    name  : The name/text for the group title
+    group : Must be as it is, to define a group
+    acs   : Mystic Access level number, to define which users can see 
+            this group. For everybody to see it, you add make it 0, for 
+            only Sysops to see make it 255.
+    -1    : Leave it as it is, it's for future stuff ;)
+    
+  To define a menu entry a line must be like this:
+  
+  title;mbase;acs;sql;description;ansi_file
+  fsxnet;mbase;20;select * from bbs where echonets like '%fsx%';|[Y16|[X39|09BBSes that are part of FSXNET;fsx.ans
+  
+  title   : The title for the menu entry
+  mbase   : Must be as it is to define a menu entry
+  acs     : Mystic Access level number, to define which users can see 
+            this group. For everybody to see it, you add make it 0, for 
+            only Sysops to see make it 255.
+  sql     : Any SQL query you like, to sort the database results as you 
+            want. Check the rest of the file to see examples.
+  description : You can write stuff to describe the menu entry. You can 
+                use MCI codes to position the cursor and change the 
+                color of the text, just use your imagination.
+                This is optional, you don't have to put a description 
+                if you don't want to.
+  ansi_file   : Also optional. It's the name of an ANSI file to 
+                display, when you select the menu entry. You only put 
+                the filename. The file has to be inside the LOGOS 
+                folder of the mod.
+  
+  The use of SQL queries, can be dangerous, so use with caution, 
+  otherwise you may have to reset the database. You can also uses SQL 
+  queries to delete records or even drop the entire database, so be 
+  careful to whom you give this privileges to and customize the Access 
+  levels accordingly.
+  
+  To avoid mistakes, the mod gives you one more function, to ask the 
+  user/sysop if he wants to execute the SQL query he just selected. If 
+  you put this string "[ASK]" in an SQL query string, like you also see 
+  in the deault LIST.CSV file, when you select this menu entry, a popup 
+  windows will be shown and only if you press YES it will execute the 
+  query, thus avoiding selecting a menu entry, by mistake and perhaps 
+  erasing the whole database.
+  
+  
+ // Functions
+ 
+  $ Download any custom BBS List
+    - in Syncterm phone book file
+    - in Magiterm phone book file
+    - Short text format *
+    - Full text format *
+  $ Download information for specific BBS
+    - As displayed in ANSI format
+    - In JSON format
+  $ Telnet to a BBS, within your current telnet session
+  $ Quick Search the List to find a BBS
+    - Q to initiate the search
+    - A to search again for the search string
+    - Y to reset the search string
+  
+  
+  * inspired by the telnetbbsguide.com BBS lists.
+
+-------------------------------------------------------------------------------
+ [ dISCLAIMER ]
+-------------------------------------------------------------------------------
+
+   The author has taken every precaution to insure that no harm or damage  
+   will occur on computer systems operating this util.  Never the less, the
+   author will NOT be held liable for whatever may happen on your computer 
+   system or to any computer systems which connects to your own as a result
+   of. operating this util.  The user assumes full responsibility for the  
+   correct operation of this software package, whether harm or damage      
+   results from software error, hardware malfunction, or operator error.   
+   NO warranties are : offered, expressly stated or implied, including     
+   without limitation or ; restriction any warranties of operation for a   
+   particular purpose and/or | merchant ability.  If you do not agree with 
+   this then do NOT use this program.                                      
+
+ 
+ * GPL3
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+  
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+  
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+   MA 02110-1301, USA.
+  
+
+-------------------------------------------------------------------------------
+ ::::::: [[ dEMONIC pRODUCTIONS // rESURRECTION z022 >>dEMONIC.nET ]] ::::::::
+-------------------------------------------------------------------------------

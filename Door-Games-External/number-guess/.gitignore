@@ -1,0 +1,10 @@
+bin/
+obj/
+*.o
+*.zip
+*.cbp
+*.depend
+*.layout
+*.exe
+NumberGuess
+

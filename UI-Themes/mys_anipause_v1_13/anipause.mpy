@@ -1,0 +1,57 @@
+import mystic_bbs as bbs
+import time, os, re, random
+import ConfigParser
+
+opersys = bbs.mci2str("OS")
+starttime=time.time()
+
+for root, dirs, files in os.walk(os.getcwd()):
+	for name in files:
+		if name == 'anipause.cfg':
+			cfgpath = os.path.abspath(os.path.join(root))+'/'
+			cfgname = os.path.abspath(os.path.join(root, name))
+
+files = [fname for fname in os.listdir(cfgpath) if re.match("pause.[0-9]+", fname)]
+choose = random.randint(1, len(files))
+
+config = ConfigParser.ConfigParser()
+config.read(cfgname)
+			
+pstring = open(cfgpath + 'pause.' + str(choose), 'r')
+
+bbs.purgeinput()
+
+while bbs.keypressed() == False and not bbs.shutdown():
+	for line in pstring:
+	
+		time.sleep(float(config.get('Timer', 'speed')) - ((time.time() - starttime) % float(config.get('Timer', 'speed'))))
+		
+		if bbs.wherey() < 24:
+			bbs.write('|BS|[K'+line+'|[A02|CR')
+
+		else:
+			bbs.write('|CR|CR|[A02')
+		
+		if bbs.keypressed() == True and opersys == "Linux":
+			bbs.write('|[L01')
+			bbs.stuffkey(chr(27))
+			break
+			
+		elif bbs.keypressed() == True and opersys == "Raspberry Pi":
+			bbs.write('|[L01')
+			bbs.stuffkey(chr(27))
+			break
+		
+		elif bbs.keypressed() == True and opersys == "OSX":
+			bbs.write('|[L01')
+			bbs.stuffkey(chr(27))
+			break
+
+		elif bbs.keypressed() == True and opersys == "Windows":
+			break
+
+		bbs.flush()
+
+	pstring.seek(0)
+	
+pstring.close()

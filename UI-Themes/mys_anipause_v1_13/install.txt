@@ -1,0 +1,65 @@
+Animated pause prompt for Mystic v1.12a45+ by maskreet
+
+(REQUIRES 1.12a46 2020/04/29 for it to work in Windows installs)
+
+1. Create a directory off your scripts directory.
+   
+   Newer versions of Mystic use a themes directory, for example
+   /mystic/themes/<theme name>/scripts/
+   
+   so you'd place this in /mystic/themes/<theme name>/scripts/anipause/
+   
+2. Edit the .cfg file with your preferred animation speed.
+   Instructions for speed values are in the .cfg file.
+
+3. You can use the default pause prompts included (pause.1, pause.2),
+   or you can make your own! You can theoretically create an unlimited
+   number of pause pause files. The script reads the install directory
+   for anything with pause.X, where X is a number from 1 to infinity, and 
+   displays a random one.
+   
+   The pause text files are very easy to setup.
+   
+   MAKE SURE YOU HAVE A BLANK LINE WITH NO SPACES AT THE BOTTOM OF THE
+   PAUSE TEXT FILE!
+   
+   This lets the script know when to terminate and restart the animation
+   properly.
+
+4. Edit your prompts.txt, either with a text editor in your /mystic/themes/<theme name>
+   or with the Mystic built-in prompt editor in your Mystic cfg.
+   
+   Look for line 22, the pause prompt.
+   
+   Replace it with
+      #<path/to/your/anipause/dir/>anipause.mpy
+	  
+   For example, a default install would be:
+      #/mystic/themes/default/scripts/anipause/anipause.mpy
+
+
+And that's it! Any questions, you can email me at:
+   sysop@throwbackbbs.com
+   
+or visit my BBS, at:
+   http://www.throwbackbbs.com
+   telnet://bbs.throwbackbbs.com
+
+Revision notes:
+
+   version 1.0  - initial release
+   version 1.01 - fixed minor glitch with first display of prompt, added additional
+                  instructions for config
+   version 1.02 - added a function to keep a node from locking if a user hung up
+                  while the prompt was displaying (thanks, xqtr!); adjusted the
+				  default speed to something a little more pleasing; added another
+                  sample pause prompt
+   version 1.1  - was able to get the script working 100% in Windows installs thanks
+                  to g00r00 adding a new function
+   version 1.11 - fixed the issue with the prompt scrolling upwards once it hit line 25
+                  with no status bar, line 24 with a status bar
+   version 1.12 - Corrected the wherey() check (24 no status bar, 23 with); increased
+                  the speed of the animation by a smidge to be more aesthetically 
+                  pleasing
+   version 1.13 - Added an OS check to make sure each OS got the proper sequence of
+                  display values

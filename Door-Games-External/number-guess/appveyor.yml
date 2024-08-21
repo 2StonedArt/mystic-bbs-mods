@@ -1,0 +1,9 @@
+version: 1.0.{build}
+skip_tags: true
+image: Ubuntu
+init:
+  - sh: sudo apt update
+  - sh: sudo apt install make
+install:
+  - sh: make
+platform: Any CPU

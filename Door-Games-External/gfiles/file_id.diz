@@ -1,0 +1,38 @@
+         G-Files for Mystic
+G-Files is a text file viewing system 
+for  Mystic BBS  systems.   It allows
+the  Sysop  to  offer text  files for 
+viewing.  G-Files  is easy to use and 
+highly  customizable.  You  no longer 
+have to  create separate menu entries 
+to display text files.
+
+G-Files  Supports  unlimited  entries 
+per directory,  and  unlimited number 
+of directories.  Each  directory  can 
+have its own look and feel.
+Uses include:
+ * Sysop bulletins.
+ * Game scores and documentation.
+ * General text file display.
+Features include:
+ * Lightbar navigation
+ * View text and ANSI files
+ * Unlimited entries per directory.
+ * Unlimited directories.
+ * Unlimited directories.
+ * Menu-Driven Sysop commands
+ * Easy to add and edit entries
+ * Easy to delete entries and also
+   delete associated textfile.
+ * Create new, and edit existing
+   text files on the fly.
+ * Sort and move entries.
+ * Multi-directory support
+ * Separate configurations per
+   directory. 
+ * Post textfiles to Message bases.
+
+Requires Mystic v1.10 A21 or later.
+    A Cyberia BBS production
+      cyberia.darktech.org

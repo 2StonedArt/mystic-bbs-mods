@@ -1,0 +1,25 @@
+17 September 2020
+   released version 0.3.3 of Slot Machine
+
+     Change log:
+        -Added: Added larger number (Thank you HSM)
+        -Added: Added better ANSI screen (Thank you HSM)
+        -Added: Added License to code
+        -Removed: Commented test lines of code
+        -Added: Added additional ifdef statement to handle command line arguments
+        -Added: Added user listing and top player list
+        -Added: $1 billon limit to avoid int issues
+
+17 September 2020
+   released version 0.3.3 of Slot Machine
+
+     Change log:
+        -Cleaned: Cleaned code
+        -Added slotmachine.h
+
+17 September 2020
+   released version 0.3.3 of Slot Machine
+
+     Change log:
+        -Added: Auto versioning
+

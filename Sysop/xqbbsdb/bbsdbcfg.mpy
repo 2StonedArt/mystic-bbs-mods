@@ -1,0 +1,267 @@
+from mystic_bbs import *
+
+import os,sys
+
+#=============================================================================
+# DO NOT EDIT BELOW!!!
+#=============================================================================
+
+cfg = getcfg()
+appdir = cfg['script']+'xqbbsdb'+os.sep
+datadir=cfg['data']
+sys.path.append(appdir)
+import bbsdbvar
+import bbsdbcom  
+import xmform
+
+tempdir = cfg['temp']
+logdir = cfg['logs']
+debug = False
+totalsteps = 11
+version = 1
+
+
+#load config file...
+cnf = {}
+if os.path.isfile(cfg['data']+bbsdbvar.prefix+'.cfg'):
+  cnf = bbsdbcom.loadjson2list(cfg['data']+bbsdbvar.prefix+'.cfg')
+else:
+  logerror('Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  sysoplog(255,'[bbsdbsql] Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+
+
+def drawansi(fl):
+  write('|07|16|CL')
+  showfile(appdir+fl,0,False,False,False)
+
+def steps(num):
+  global totalsteps,cnf
+  tform = xmform.mform()
+  tform.cl_normal = 7
+  tform.cl_high = 4
+  tform.cl_edit_normal = 7+4*16
+  tform.cl_edit_high = 15+4*16
+  tform.cl_editing = 4*16
+  tform.cl_key_norm = 12
+  tform.cl_key_high = 12
+  res = True
+  drawansi('cfg'+os.sep+'bg'+str(num)+'.ans')
+  if num>0:
+    bbsdbcom.writexy(67,24,4,'Step |15'+str(num-1)+' |04of |15'+str(totalsteps))
+  else:
+    bbsdbcom.writexy(67,24,4,' '*12)
+  if num == 2:
+    cnf["echonets"] = []
+    del tform.items[:]
+    gotoxy(7,6)
+    if getyn('',True):
+      bbsdbcom.writexy(5,9,7,'Add the networks your BBS supports.')
+      bbsdbcom.writexy(5,10,7,'Press SPACE to switch value, ENTER to accept.')
+      nets = bbsdbvar.nets
+      while True:
+        tform.additem(11,7,12,10,'Network',30,12,20,20,'Stop','N','net',nets)
+        tform.drawall()
+        tform.show()
+        cnf["echonets"].append(tform.results['net'])
+        cnf["echonets"]=list( dict.fromkeys(cnf["echonets"]) )
+        s  = ''
+        for n in cnf["echonets"]:
+          s += n+';'
+        bbsdbcom.writexy(5,16,8,'Added so far...')
+        bbsdbcom.writexy(5,17,8,s[:60])
+        gotoxy(5,20)
+        if not getyn('|07|16Add another?',True):
+          break
+        else:
+          bbsdbcom.writexy(5,20,7,' '*30)
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 3:
+    cnf["base_id"] = []
+    del tform.items[:]
+    bbsdbcom.writexy(5,13,7,'Add the Message Bases you want to share DATA.')
+    bbsdbcom.writexy(5,14,7,'Press SPACE to switch value, ENTER to accept.')
+    bases = [ b['filename'] for b in bbsdbcom.getbases()]
+    added = []
+    #print(bbsdbcom.getbases())
+    #bbsdbcom.pause()
+    while True:
+      tform.additem(11,7,16,10,'Msg.Base',31,16,20,20,'Stop','M','base',bases)
+      tform.drawall()
+      tform.show()
+      for bs in bbsdbcom.getbases():
+        if bs['filename'] == tform.results['base']:
+          cnf["base_id"].append(bs['id'])
+      added.append(tform.results['base'])
+      cnf["base_id"]=list(set(cnf["base_id"]))
+      s  = ''
+      for n in added:
+        s += n+';'
+      bbsdbcom.writexy(5,18,8,'Added so far...')
+      bbsdbcom.writexy(5,19,8,s[:60])
+      gotoxy(5,21)
+      if not getyn('|07|16Add another?',True):
+        break
+      else:
+        bbsdbcom.writexy(5,21,7,' '*30)
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 4:
+    cnf["post_base_id"] = []
+    del tform.items[:]
+    bbsdbcom.writexy(5,13,7,'Add the Message Bases for searching...')
+    bbsdbcom.writexy(5,14,7,'Press SPACE to switch value, ENTER to accept.')
+    bases = [ b['filename'] for b in bbsdbcom.getbases()]
+    added = []
+    #print(bbsdbcom.getbases())
+    #bbsdbcom.pause()
+    while True:
+      tform.additem(11,7,16,10,'Msg.Base',31,16,20,20,'Stop','M','base',bases)
+      tform.drawall()
+      tform.show()
+      for bs in bbsdbcom.getbases():
+        if bs['filename'] == tform.results['base']:
+          cnf["post_base_id"].append(bs['id'])
+      added.append(tform.results['base'])
+      cnf["post_base_id"]=list(set(cnf["post_base_id"]))
+      s  = ''
+      for n in added:
+        s += n+';'
+      bbsdbcom.writexy(5,18,8,'Added so far...')
+      bbsdbcom.writexy(5,19,8,s[:60])
+      gotoxy(5,21)
+      if not getyn('|07|16Add another?',True):
+        break
+      else:
+        bbsdbcom.writexy(5,21,7,' '*30)
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 5:
+    cnf['share_mgroups']=False
+    cnf['share_mods']=False
+    cnf['share_fgroups']=False
+    gotoxy(40,5)
+    nodes = getstr(10,3,3,'4')
+    if not nodes: nodes = 4
+    try:
+      cnf['nodes'] = int(nodes)
+    except:
+      cnf['nodes'] = 4
+    bbsdbcom.writexy(5,6,7,'Share File Groups? ')
+    if getyn('',True): cnf['share_fgroups']=True
+    bbsdbcom.writexy(5,7,7,'Share Message Groups? ')
+    if getyn('',True): cnf['share_mgroups']=True
+    bbsdbcom.writexy(5,8,7,'Share List of MODS that your BBS also uses? ')
+    if getyn('',True): cnf['share_mods']=True
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 6:
+    cnf['email']=''
+    gotoxy(14,7)
+    email = getstr(1,40,100,'')
+    if not email: email=''
+    try:
+      cnf['email'] = str(email)
+    except:
+      cnf['email'] = ''
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 7:
+    cnf['dialup']=''
+    gotoxy(13,7)
+    dialup = getstr(4,40,40,'')
+    if not dialup: dialup=''
+    try:
+      cnf['dialup'] = str(dialup)
+    except:
+      cnf['dialup'] = ''
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 8:
+    cnf['web']=''
+    gotoxy(12,7)
+    web = getstr(1,40,100,'')
+    if not web: web=''
+    try:
+      cnf['web'] = str(web)
+    except:
+      cnf['web'] = ''
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 9:
+    cnf['login']=''
+    gotoxy(14,7)
+    login = getstr(1,40,100,'')
+    if not login: login=''
+    try:
+      cnf['login'] = str(login)
+    except:
+      cnf['login'] = ''
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 10:
+    cnf["theme"] = 'default'
+    del tform.items[:]
+    bases = [ b['filename'] for b in bbsdbcom.getbases()]
+    themes = os.listdir(appdir+'images')
+    tform.additem(11,7,8,10,'Theme',13,8,20,20,'Stop','T','theme',themes)
+    
+    tform.drawall()
+    tform.show()
+    cnf['theme'] = tform.results['theme']
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+  elif num == 11:
+    cnf['telnet']=''
+    while True and not shutdown():
+      gotoxy(16,8)
+      telnet = getstr(1,40,100,cnf['telnet'])
+      if telnet and (':' in telnet):
+        cnf['telnet'] = str(telnet)
+        break
+
+    bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+    
+  elif num == 0:
+    bbsdbcom.writexy(3,8,8,cfg['data']+bbsdbvar.prefix+'.cfg')
+    gotoxy(1,25)
+    bbsdbcom.pause(False)
+    
+  
+def main():
+  global cnf,version
+  bbsdbcom.clrscr()
+  drawansi('cfg'+os.sep+'bg1.ans')
+  gotoxy(29,18)
+  if getyn('',True):
+    for step in range(2,totalsteps+1):
+      steps(step)
+    step = 0
+    steps(step)
+  
+  bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg') 
+     
+main()
+bbsdbcom.clrscr()
+
+'''
+theme = {}
+theme["vgroup_cl"] = 112 
+theme["dialog_title_at"] = 14 
+theme["tree_y2"] = 22 
+theme["tree_y1"] = 5 
+theme["view_x1"] = 27 
+theme["view_x2"] = 77 
+theme["dialog_text_at"] = 15 
+theme["group_fill_ch"] = 196 
+theme["vbase_clsel"] = 110 
+theme["mbase_clsel"] = 110 
+theme["vlink_cl"] = 11 
+theme["tree_x1"] = 3 
+theme["tree_x2"] = 22 
+theme["tree_title_at"] = 78 
+theme["group_cl"] = 79 
+theme["vgroup_fill_ch"] = 196 
+theme["tree_title_x"] = 3 
+theme["tree_title_y"] = 3 
+theme["view_y2"] = 23 
+theme["vbase_cl"] = 64 
+theme["view_y1"] = 2 
+theme["mbase_cl"] = 64 
+theme["vfile_cl"] = 7
+theme["version"] = version
+
+themefile=appdir+'images'+os.sep+'default'+os.sep+'theme.json'
+bbsdbcom.savelist2json(theme,themefile) 
+'''

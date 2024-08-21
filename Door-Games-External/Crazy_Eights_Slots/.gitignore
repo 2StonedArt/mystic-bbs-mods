@@ -1,0 +1,12 @@
+bin/
+obj/
+*.o
+*.zip
+*.cbp
+*.depend
+*.layout
+*.exe
+slotmachine
+player.dat
+slotplyr.idx
+slotplyr.txt

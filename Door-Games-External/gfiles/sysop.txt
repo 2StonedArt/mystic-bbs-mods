@@ -1,0 +1,202 @@
+                               G-Files Lister
+                                and TextView
+                              for mystic 1.10+
+                               by Darryl Perry 
+Software --------------------------------------------------------------------
+       [ ] PCB PPe      [ ] OBV          [ ] VGA         [ ] OTHER___________
+       [ ] Renegade     [ ] Iiniquity    [ ] ASCII       [ ] HTML/CGI/WWW    
+       [x] Mystic       [ ] WWVI         [ ] Telegard    [x] MPL
+       [ ] ANSI         [ ] TEXT
+OS --------------------------------------------------------------------------
+              [x] dos  [ ] os/2  [x] windows [x] Win32 [x] *nix
+Type ------------------------------------------------------------------------
+                infoform [ ]   utility [X]  misc [ ]  door [X]
+Disclaimer-------------------------------------------------------------------
+
+   The author has taken every precaution to insure that no harm or damage
+will occur on computer systems operating this util.  Never the less, the
+author will NOT be held liable for whatever may happen on your computer
+system or to any computer systems which connects to your own as a result of
+operating this util.  The user assumes full responsibility for the correct
+operation of this software package, whether harm or damage results from
+software error, hardware malfunction, or operator error.  NO warranties are
+offered, expressly stated or implied, including without limitation or
+restriction any warranties of operation for a particular purpose and/or
+merchant ability.  If you do not agree with this then do NOT use this
+program.
+
+G-Files Description-----------------------------------------------------------
+
+o G-Files is a graphical text file lister and viewer.  It is reminescent of
+  the old WWIV G-Files option that displays text files to users.  However
+  this program is much more configurable.
+  
++ Features include:
+o Lightbar selection: up, down, page up, page down, Home, End
+o Default Configurable ansi menus
+o Multiple sub-directory support (limted only by OS constraints)
+o Optional separate configurations per sub-directory.
+o Help menus
+o Display both ansi and text files.
+o Full screen text viewer, scroll and search for text.
+
+
+TextView Description ---------------------------------------------------------
+
+o TextView is a full screen text file viewer.  It displays files, and allows
+  the user to scroll up or down, or quickly move to the beginning or the end 
+  of the file.  A progress bar at the right also shows where the page is in
+  relation to the whole file.
+
+o TextView is intended as a companion program to G-Files, but it can also be
+  used as on it's own when the sysop wishes to display a text file to his or
+  her users.  
+
+o TextView works best for simple text files.  TextView is not recommended for 
+  displaying ANSI display files.
+
+NOTE!!!
+
+  TextView is NOT required for use with GFILES.  If the textview.mpx file is
+  not found in the scripts directory, GFILES will automatically use the built-
+  in Mystic textviewer.
+  
+G-Files MPL Intallation-------------------------------------------------------
+
+o Place the gfiles.mps in the Mystic SCRIPTS directory and then compile it with 
+  mplc or mide.  
+
+o Place gfmain.ans, default_gfhi.ans and default_gflow.ans, gfhelp.ans and 
+  gfhelps.ans in the Mystic TEXT directory.
+
+o Rename default_gfhi.ans to gfhi.ans, and default_gflo.ans to gflo.ans
++ Note: example1_gfhi.ans and example1_gflo.ans are also provide as examples
+  that I uses for my game scores directory.
+
+o Add G-Files to your desired menu.  The Mystic menu type is GX for running 
+  a script. There is only one required parameter.  The first parameter must 
+  be the path to the desired text file directory.  The next parameter is 
+  optional.  It will be the text that gets displayed in the title line of the
+  G-Files menu.  If there are multiple words, the spaces must be replaced with
+  underbars '_'.  See format below.
+
+Type: GX
+Data: gfiles </path/to/desired/textfile/dir> Optional_Display_Title
+
+TextView Implementation ------------------------------------------------------
+
+NOTE!!! Textview is NOT required for use with GFILES.  Installation of this
+  app is by your own preference.
+
+o Place the textview.mps file in the Mystic scripts directory.
+o Compile ith with mplc.  i.e. "mplc textview"
+o Place the textview.ans in the TEXT directory.
+o Usage:
+  o Type: GX
+  o Data: textview /path/to/textfile.ext Optional_File_Title
+
+#NOTE#
+  The TextView app is optional, and is not required for use with G-Files.  
+  G-Files will only use it if textview.mpx is found in the scripts directory.
+  If you do not compile textview.mps, or remove ./script/textview.mpx, G-Files
+  will use the default Mystic text file viewer.
+
+  Historically, TextView was developed as a text reader before Mystic had a
+  default text file viewing option.  G-Files however, still reflects the old
+  method of viewing files.
+
+G-Files Configuration --------------------------------------------------------
+
+o Create a directory to use for your textfiles.  I created a subdir from
+  my Mystic TEXT directory, ./text/gfiles.  Place all desired text files
+  in that directory.  Subdirectories are also permitted, and can be used 
+  to group and categorize your text files.
+
+Adding entries to the list ---------------------------------------------------
+
+G-files will not know about any new files until you tell it to look for and
+add them to the list.  This is done by selecting 'A' from the main menu.  
+G-Files will then search the directory for any unknown files, and add them 
+to the list.  The titles of the files will be the same as the name of the
+file.  To change the title of the file, highlight it, and select 'U' to 
+update the title.
+
+The full list of sysop commands are as follows:
+
+o A - Add files to the list of known files.
+o S - Sort the list by filename
+o D - Delete the highlighted entry.  You will be prompted to delete the 
+      file from the dir as well as the entry.  It is possble to delete only
+      the title from the list, and not the file from the dir.
+o M - Move the highlighted entry up or down.  Select ENTER to finish moving.
+o U - Update the highlighted entry title.  Use this option to rename any
+      entry titles as you see fit.
+
+Menu and configuration files -------------------------------------------------
+
+The default menus should be placed in the Mystic theme TEXT directory.  
+However, the individual subdirectories can have separate configurations.  
+If you wish to have a separate a subdirectory to have a different config, just
+place the gfmain.ans, gfhi.ans or gflo.ans in that paricular subdirectory.
+If G-Files finds any one of the gfmain, gfhi, or gflo ans files in a subdir,
+it will use that file.  If it does not find the file, it will use the default
+file found in the Mystic TEXT dir.
+
+GFMAIN.ANS (and TEXTVIEW.ANS)
+ 
+ gfmain is the main menu file for G-Files.  Alter this to your own needs.
+
+ Use the |!<number> Mystic MCI codes to define certain aspects of the menu
+ screen.
+
+ !1 - Top Left corner of the menu screen.  This should be placed at the row
+      and column where the first line of the entry titles will be displayed.
+ !2 - Bottom Right corner of the menu screen.  This should be placed at the
+      row and column where the last char of the last line of entry titles will
+      be displayed.
+ !3 - Title line, left-most column.  This is where the title of the directory
+      will be display
+ !4 - Title line, right-most column
+ !5 - Menu line, left-most column.  This is where the menu prompts will be
+      displayed.
+ !6 - Menu line, right-most column.
+
+GFHI/GFLO files.
+
+ The gfhi.ans and gflo.ans files are used to define the entry list lines, for 
+ both the regular text (gflo) and the highlighted text (gfhi).
+
+ Use the |&<number> Mystic MCI codes to define certain aspects of the entry 
+ list.
+
+ &1 - Title of the entry.
+ &2 - Age in file in days.  Example, if the file is 2 days old, it will 
+      display "2 days ago."  If it is over a month old, it will say 
+      "X months ago".  I use this arrangement for my game scores directory.
+ &3 - Date of the entry.  This is the date of the file in MM/DD/YY format.
+ &4 - Time of the entry.  This ss the time of the file in HH:MM format.
+ &5 - This is the file size of the entry.
+ &6 - Filename of the entry.
+
+ In order to correctly position the cursor when updating the entry title,
+ G-Files also needs to know where to place the cursor.  This is done by 
+ utilizing the |!8 MCI code in the GFHI.ANS file.  Place the |!8 code at the
+ position where the entry title begins.
+
+
+Bug Fixes/History-------------------------------------------------------------
+
+Version 1.0 is the first release.  
+Version 1.1.  Added missing textview.ans to distro.
+              Added option to download the highlighted text file.  Updated
+              help ansi's to reflect the new option.
+
+Bug Reports-----------------------------------------------------------------
+
+If you want to send me bug report or a note telling me how much you like it,
+please feel free to do so.
+
+Cyberia BBS web page (http://cyberia.darktech.org)
+Email me at dperry.geo@yahoo.com
+Telnet to telnet://cyberia.darktech.org
+

@@ -1,0 +1,79 @@
+#########################################################
+##      FCC AMATEUR RADIO CALLSIGN DATABASE LOOKUP     ##
+##                 a.k.a. "HAMSERACH"                  ##
+##                       v.2.1 ALPHA                   ##
+##  Copyright (c) 2022, Richard L. Gattie II, KB2MOB   ##
+##           Distributed under the BSD License         ##
+#########################################################
+
+from mystic_bbs import *
+import os.path
+from os import path
+import sys
+
+global callsign
+global callsignOpclass
+dbFolder = '/full/path/to/your/hamsearch/datafolder/' # ex. - /home/pi/mystic/themes/default/scripts/hamsearch/data/
+
+
+# Get what we need from the EN.dat file
+def lookUp(callsign):
+  enOutput = ""
+  enDB = open(dbFolder + "EN.dat" , "r")
+  for enline in enDB:
+    enlist = enline.split("|")
+    if enlist[4] == callsign:
+      enOutput = enlist[8] + "," + enlist[9] + "," + enlist[10] + "," + enlist[11] + "," + enlist[15] + "," + enlist[16] + "," + enlist[17] + "," + enlist[18]
+      enDB.close()
+      return enOutput
+    else:
+      pass
+
+# Get What we need from the AM.dat file
+def grabAM(callsign):
+  amDB = open(dbFolder + "AM.dat" , "r")
+  for amline in amDB:
+    amlist = amline.split("|")
+    if amlist[4] == callsign:
+      amOutput = amlist[5] + ","  + amlist[15] + "," + amlist[16]
+      amDB.close()
+      return amOutput
+    else:
+      pass
+
+# This function Coming Soon!
+def grabCO(callsign):
+  pass
+
+# Is there database files?
+def checkDB():
+  if path.exists(dbFolder + "EN.dat" and dbFolder + "AM.dat") == False:
+    write("Can't find HamSearch databases...\n|PA")
+  else:
+    pass
+
+
+write("|DFfcchdr.ans|");
+write("                              v.2.1 ALPHA\n");
+write("                          ENTER CALLSIGN: ");
+callsign = getstr(11, 6, 120, "");
+callsign = callsign.upper()
+
+enOutput = lookUp(callsign)
+enDisplay = enOutput.split(",")
+amOutput = grabAM(callsign)
+amDisplay = amOutput.split(",")
+
+if amDisplay[1] == "":
+  amDisplay[1] = "None"
+else:
+  pass
+
+writeln(" " + callsign + " (" + amOutput[0] + ")");
+writeln(" " + enDisplay[0] + " " + enDisplay[1] + " " + enDisplay[2] + " " + enDisplay[3]);
+writeln(" " + enDisplay[4]);
+writeln(" " + enDisplay[5] + ", " + enDisplay[6] + " " + enDisplay[7]);
+writeln(" Previous Callsign : " + amDisplay[1]);
+writeln(" Previous License Class : " + "(" + amDisplay[2] + ")");
+
+write("\nSearch complete...\n|PA");

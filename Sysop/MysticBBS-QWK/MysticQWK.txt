@@ -1,0 +1,111 @@
+In order to set up a QWK network within Mystic is not very difficult, and it does work. Trust me.
+
+This information is using the most current version of Mystic BBS at the time of this writing, which is 1.12 A 43.
+
+----------------------------------------------------------------------------------------------
+
+First, make sure you have a QWK account set up on the hub BBS. If this is Synchronet, make sure you log in and set the areas you would like, along with the message pointers. Make sure you obtain a list of the conferences and the QWK Base ID numbers, as you will need that information to set up the message bases.
+
+1 - Open Mystic with "mystic -cfg" (or ./mystic -cfg in Linux).
+
+2 - Under Networking, select "QWK Networks"
+
+3 - If nothing is listed in this menu, select "/" on your keyboard, and chose "Insert"
+
+4 - Hit enter on the newly created network connection
+
+5 - Active Poll will default to "No". Leave it alone for now. We'll get back to that.
+
+6 - Select "Network Name" and type in the name of the network (eg. Dovenet) and hit "Enter"
+
+7 - Select "Member Type" and change it to node.
+
+8 - Select "FTP Host" and type in the full hostname you will be connecting to, including port, if other than standard. For example, "dove.synchro.net" and hit "Enter"
+
+9 - Select "Login" and enter the login you chose when you set up your QWK account, and hit "Enter"
+
+10 - Select "Password" and enter the password you chose when you set up your QWK account, and hit "Enter"
+
+11 - Select "Use Passive" and change it to "Yes"
+
+12 - Select "Packet ID" and enter the packet name you will be receiving from your hub. If you had used Synchronet previously, this will be the Hub System ID, such as "Vert" or "Mojo". Your hub will tell you what this name will be if you don't know.
+
+13 - "Archive Type" should already be set for ZIP, so we can leave that alone
+
+14 - "Use QWKE" should be set for "No", and we'll leave that one alone as well.
+
+15 - Hit ESC twice to get back to the main menu, and move over and select "Editors".
+
+16 - Move down to "Message Group Editor" and hit "Enter"
+
+17 - Hit the "/" key on your keyboard and insert a new group. If your board doesn't use message groups, you can skip to step 20
+
+18 - Hit "Enter" on the "Name" field, and type in the name of the network (eg. Dovenet) and hit "Enter". Make a note of the ID number of the group, as you will need this information later.
+
+19 - The other fields are optional, so you can now hit ESC twice
+
+20 - Move up to the "Message Base Editor" and hit "Enter"
+
+21 - Move down to where you would like to insert the new message bases, or you can hit the "End" key to move to the bottom.
+
+22 - Hit the "/" key and insert a new message bases
+
+23 - Hit "Enter" on the new message base you created.
+
+24 - Hit "Enter" on the "Name" field, and type in the full description of the message base. I would suggest starting with something to indicate the network in this field as well. For example, instead of just "General", I would put in "Dove General". This makes it easier to tell what message base, from what network you're in while reading messages. Once finished typing, hit "Enter"
+
+25 - Move down to "QWK Name" and enter the QWK ID, which is provided in the network information. For example, "DOVE-Net" is the ID for the General message base within Dovenet. Hit "Enter" when finished
+
+26 - Move down to "File Name" and type in a unique file name for this message base. I like to use the QWK ID for this field, as it will typically be unique. Hit "Enter" when finished.
+
+27 - Move down to the "QWK Network" field and hit "Enter". This will bring up a list of the QWK networks currently set up within Mystic. Scroll down to the corrent network, and hit "Enter"
+
+28 - Move down one, to the "QWK Base ID" field. This is where you type in the conference ID number supplied by the network information. In our example of "Dove General", it is "2001". Hit "Enter" when finished
+
+29 - Hit ESC, and repeat steps 21 - 28, until you have all of the message bases created and filled in.
+
+30 - Move up to the first base you created. Press the "TAB" key on your keyboard, and select all of the bases you just created.
+
+31 - Press the "/" key and this time chose "Global"
+
+32 - On the screen that comes up, move down to "List ACS". This field defines the users access needed to see this message base. Change the "No" in front of it, to "Yes". Then move over to the right, and hit "Enter". Enter the access you would like, and hit "Enter" to save. I have mine set to "s10g13", which is security level 10 and message group 13. The group number is the ID from when you set up the group in step 18 (For more information on this, check out YouTube's "Mystic Guy" videos. He shows in great detail how this works. Thanks Avon)
+
+33 - Move down to "Read ACS", and enter in the access you would like to read the messages in this base. Mine is set for "s10g13". Make sure you set the "Yes" in front of it
+
+34 - Move down to "Post ACS", and enter in the access you would like for users to post messages in this bases. Mine is "s20g13". Set the "Yes"
+
+35 - Move down to "Sysop ACS", and enter in the access you have for Sysop access. Mine is "s255g13". Set the "Yes"
+
+36 - Move over to the "Max Msgs" and change that to how many messages you would like in each base. Set the "Yes" if you change the field.
+
+37 - Move down to the "Max Msg Age" and change that if needed. Set the "Yes" if you do.
+
+38 - Change the rest of the options, as needed. Setting the "Yes" for each one you change.
+
+39 - Once all the options are set correctly, hit "CTRL-U" to save the information to all of the bases. Mystic will ask you if you would like to "Update XX settings per base?". Chose "Yes"
+
+40 - Hit ESC, and go back to "Configuration" and chose QWK Networking". 
+
+41 - Hit "Enter" on the network you just set up. and change the "Active Poll" to "Yes"
+
+42 - ESC out of Mystic, and back to a command prompt
+
+43 - Type in "qwkpoll all", or you can type in "qwkpoll 1", if this is your first QWK network.
+
+44 - If everything was set up properly, Mystic will connect with your hub, and download new messages for your bases.
+
+45 - Set up an event to poll your hub at specific intervals. There is an example event in Mystic which can be used as a reference.
+
+I hope these instructions help you get connected to QWK networks. Of the three that I an involved with, two of them worked, and one had an issue on the hubs end. All three of them are working smoothly now.
+
+If anybody finds any errors in these instructions, please let me know. As I'm typing this, it's almost 3AM, and I have to work at 9AM. :/
+
+Dan Richter
+aka Black Panther
+Sysop - Castle Rock BBS
+email dan@castlerockbbs.com
+telnet://bbs.castlerockbbs.com
+http://www.castlerockbbs.com
+The sparrows are flying again...
+
+(c)2018-2019 Castle Rock BBS

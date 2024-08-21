@@ -1,0 +1,20 @@
+20 September 2020
+   released version 0.6.5 of Idle Ballz
+
+     Change log:
+        -Added: User database to store names and times
+        -Added: 1 million point cutoff
+        -Added: Top score list
+
+17 September 2020
+   released version 0.5.0 of Idle Ballz
+
+     Change log:
+        -Added: Added title screen
+
+17 September 2020
+   released version 0.5.1 of Idle Ballz
+
+     Change log:
+        -Added: Auto Versioning
+

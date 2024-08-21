@@ -1,0 +1,897 @@
+; &1=Login attempt &2=Allowed attempts &3=Remaining attempts
+000 |CL|DFpreuser||[X56|[Y08|02LOGIN: |IN12
+; Log in as new user prompt
+001 |CR|12Create an account with this BBS? |02
+; Standard user login: User's password
+002 |CR|[X56|[Y09|02PASSW: |IN12
+; Standard user login: Invalid PW
+003 |CR|[X56|[Y10|12Invalid password.
+; Displayed IMMEDATELY when a user connects if the password is set
+004 |CR|02System Password: |XX
+; New user password prompt
+005 |CR|02New User Password: |XX
+; New user login: first and last name prompt
+006 |02[|10þ|02] |02Enter your full REAL name       -> |XX
+; New user login: Enter your handle/alias prompt
+009 |02[|10þ|02] |02Enter your alias/handle         -> |XX
+; New user login: Enter your address prompt
+010 |CR|02Enter your street address.|CR|02:
+; New user login: Enter your city/state
+011 |CR|02Enter your city & state.|CR|02:
+; New user login: Enter your ZIP code
+012 |CR|02Enter your postal code: #####|CR|02:
+; New user login: Enter your home phone number
+013 |CR|02Enter your home phone number:|CR|02:
+; New user login: Enter your data phone number
+014 |CR|02Enter your data phone number:|CR|02:
+; New user login: Enter your birthdate.
+015 |02[|10þ|02] |02Enter your birthdate |02[|10|UF|02]|02 -> |XX
+; New user login: Gender M)ale, F)emale, U)ndisclosed
+016 |02[|10þ|02] |02[|10M|02]|02ale, |02[|10F|02]|02emale, |02[|10U|02]|02ndisclosed -> |XX
+; New user login: Password prompt
+017 |DFprepass||CR|02[|10þ|02] |02Password -> |XX
+; New user login: PW verification prompt
+019 |02[|10þ|02]    |02Again -> |XX
+; New user login: Saving/creating new user account
+021 |CR|02[|10þ|02] |02Saving new account information|01...
+; System pause prompt
+022 |16|15þ|07þ|08þ|10|18Ý|00 Pause |10Þ|16|08þ|07þ|15þ
+; Chat call - reason for chat
+023 |CR|02Why do you wish to chat with the Sysop?|CR|02:
+; Paging Sysop text
+024 |CR|02Paging SysOp
+; Paging Sysop status
+025 |02.
+; Displayed when sysop breaks into chat mode
+026 |CR|02Chat mode engaged...|CR|02
+; Displayed when sysop exits chat mode
+027 |CL|02[|10þ|02] |02Chat mode complete.  Press |02[|10ENTER|02] |02to continue|02...
+; User list header
+029 |CL|CR   |02Ú|$D73Ä|02¿|CR   |10³|18 ± |00User Listing|$D58 |16|02³|CR   |02À|02|$D73ÄÙ|CR    |10U|02ser |10N|02ame|07|$D19 |10L|02ocation|02                   |10S|02ex/|10A|02ge    |10L|02ast|10O|02n|CR    |02|$D73Ä
+; User list format:
+; &1 = Alias &3 = Last on &2 = City &4 = gender &5 = sec lvl &6 = Address
+; &7 = Age   &8 = email   &9 = usernote &0 = opt1 &A = opt2 &B = opt3
+030     |02|$R27|&1 |$R27|&2 |&4   |$L02|&7   |&3
+; User list footer     &1 = Total # of users listed
+031     |02|$D73Ä|CR    |02[|10þ|02] |02Users: |10|$R46|&1 |PA
+; User list search string
+032 |CR|02[|10þ|02] |02Enter Search String |02(|10Enter|02/|10All|02)|02: |XX
+; File base list header
+033 |CL|02Ú|$D77Ä|02¿|CR|02³|10|18 ± |00File Base Listing|$L56|FG |02|16³|CR|02À|02|$D77ÄÙ|CR |10A|02rea  |10F|02ile |10B|02ase |10N|02ame                |10A|02rea  |10F|02ile |10B|02ase |10N|02ame|CR |02|$D77Ä
+; File base listing format:
+; &1 = File Base #      &2 = File Base Name     &3 = Files in Base
+034 |10|$L05|&1  |02|$R32|&2
+; File upload testing FAILED text
+035 |02Failed
+; File base listing prompt.
+036  |02|$D77Ä|CR |02[|10þ|02] |02Select file base |02[|10?|01/|10List|02]|02: |XX
+; File listing header
+041 |CL|02Ú|$D77Ä¿|CR³|10|18 ± |00File Listing|$L61|FB |16|02³|CR|02À|02|$D77ÄÙ
+; Standard file list: #/filename:
+; &1 = filenum, &2 = filename, &3 = tag char &4 = size &5 = date &6 = DLs
+042  |16|10|&1|02|&3|10|$R57|&2 |02|$L07|&4 |&5
+; Standard file list: description/info
+; &1 = size, &2 = date, &3 = DLs, &4 = desc, &5 = uploader
+043 |16|02|$D29 |&4
+; File listing pause prompt
+; &1 = total files &1 = current file
+044 |16|CR|02[|10þ|02] |02Pause: |02(|10N|02)|02ext, |02(|10P|02)|02rev, |02(|10F|02)|02lag, |02(|10V|02)|02iew, or |02(|10Q|01)|02uit? |02
+; Standard file list, ext desc: &4 = description
+045 |16|10|$D29 |&4
+; Displayed when batch queue is full
+046 |CR|02Batch queue is full!
+; Add file to batch queue "File Name" prompt
+047 |CR|02File Name|CR:
+; Displayed if file is already in batch queue
+049 |CR|02File is already in queue
+; File added to batch:
+; &1 = file name        &2 = file size
+050 |CR|10|&1 |02(|10|&2 bytes|02) |02added to queue.
+; File not found
+051 |CR|02File not found.|DE|DE|DE
+; Displayed if batch queue is empty
+052 |CL |02There are no files in your batch queue
+; &1 = number of files in batch queue
+053 |CR |02Delete which |02(|101|02-|10|&1|02)|02: |XX
+; Batch removed from queue  &1 = Filename  &2 = Size
+054 |CR|10|&1 |02(|10|&2 bytes|15|02) |02removed from queue.
+; File upload PASSED text
+055 |02Passed
+; Batch queue list header
+056 |CL|02Ú|$D77Ä|02¿|CR|02³|18 ± |00Batch Queue Editor|$D56 |16|02³|CR|02À|02|$D77ÄÙ|CR |10#|02#  |10F|02ile |10N|02ame|07|$D50 |10S|02ize   |10D|02L |10T|02ime|CR |02|$D77Ä
+; Batch queue list format:
+; &1 = file #  &2 = file name  &3 = file size  &4 = est mins  &5 = est secs
+057  |02|$L02|&1  |02|$R51|&2 |02|$L11|&3  |10|$L03|&4|04m |12|$L02|&5|04s
+; Protocol list prompt &1=Hotkey &2=Description
+061 |02[|10|&1|02] |&2
+; Protocol select prompt
+062 |CR|02Select Protocol [|10Q/Quit|02]: |XX
+064 |02[|10þ|02] |02Search all file groups? |02
+; Press ENTER to start file transfer  &1=selected protocol
+; First word is input chars, followed by display text
+065 SQ |CR|02Press |02[|10ENTER|02/|10S|02]|02tart or |02[|10ESCAPE|02/|10Q|02]|02uit your |10|&1 |02transfer: |XX
+; Disconneting in 10 seconds, press a key to abort
+067 |CR|02Disconnecting in 10 seconds: Press a key to abort.
+070 |CR|02Searching for duplicate files ... |XX
+071 |02None found.
+; File description input header.  &1 = Max description lines. &2 = filename
+072 |CR|02Enter Description. |&1 Lines Max. Blank Line Ends.
+; Archive list header (see 169-171)
+073 |CL|02Available Archive Formats:|CR|CR|10#|02#  |10D|02escription            |10E|02xt|CR|02|$D30Ä
+; Archive selected string
+074 |CR|02Archive type set to: |10|&1|02.|DE
+075 |CR|02Thanks for your upload, |UH!|CR|CR|PA
+077 |CR|02[|10þ|02] |02Searching|02...
+; File Information:
+; &1 = filename     &2 = file size   &3 = uploaders name
+; &4 = update date  &5 = downloads   &6 = est mins         &7 = est secs
+078 |CR|02File Name     |08-> |10|&1|CR|02File Size     |08-> |10|&2|CR|02Uploaded by   |08-> |10|&3|CR|02Uploaded on   |08-> |10|&4|CR|02Downloads     |08-> |10|&5|CR|02Download Time |08-> |10|&6 |02min |10|&7 |02sec|CR
+; Batch Queue Info:
+; &1 = files in batch   &2 = batch size   &3 = est. mins   &4 = est. secs
+079 |CR|02Files in Batch |08-> |10|&1|CR|02Batch Size     |08-> |10|&2|CR|02Estimated Time |08-> |10|&3 min |&4 seconds
+; Coping from slow media device prompt &1 = filename
+082 |CR|02Copying |10|&1 |02from slow media device...
+; Upload Successful:  &1 = file name
+083 |CR|12þ |10|&1 |02found.|CR
+; Upload Failed:  &1 = file name
+084 |CR|12þ |10|&1 |02skipped.|CR
+; &1 = File Base Name
+087 |CL|02Scanning: |10|&1|02...
+088 |02No new files found.|DE|DE|DE
+089 |02New files scan completed.|DE|DE|DE
+090 |CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00QWK Scan Settings|$L56|MG |02|16³|CR|02À|02|$D77ÄÙ
+091 |CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00New Scan Settings|$L56|MG |02|16³|CR|02À|02|$D77ÄÙ
+092 |10 #|02#  |10S|02can |10M|02essage |10B|02ase |10N|02ame             |10#|02#  |10S|02can |10M|02essage |10B|02ase |10N|02ame|CR |02|$D77Ä
+; Message base New/QWK Scan format:
+; &1 = base number      &2 = base name      &3 = scan base? (Yes or No)
+093  |02|$R04|&1|10|$R03|&3  |02|$R29|&2
+; Message base new and qwk scan toggle prompt:
+095 |02Toggle: |02[|10#-#,#|02], Select [|10A|02]dd All, [|10R|02]emove All, [|10?|02/|10List|02]: |XX
+; For strings 096 - 099: &1 = message base name
+096 |CR |02|&1 will NOT be scanned in QWK packets!|CR
+097 |CR |02|&1 will be scanned in QWK packets!|CR
+098 |CR |02|&1 will NOT be scanned in new message scan!|CR
+099 |CR |02|&1 will be scanned in new message scan!|CR
+100 |CL|02Ú|$D77Ä|02¿|CR|18³|02 ± |00Message Base Listing|$L53|MG |02|16³|CR|02À|02|$D77ÄÙ|CR |10A|02rea  |10M|02essage |10B|02ase |10N|02ame                |10A|02rea  |10M|02essage |10B|02ase |10N|02ame|CR |02|$D77Ä
+; Message base format list:
+; &1 = base number      &2 = base name      &3 = total messages
+101 |02|$L05|&1  |10|$R32|&2
+102  |02|$D77Ä |CR |02Select Message Base |02[|10?|02/|10List|02]|02: |XX
+103 |02UNUSED
+; Message base "To" input default value
+104 |02All
+107 |02[|10þ|02] |02Saving Message|02...
+; Send Private message. &1 = Message TO
+108 |CR|02Sending private message to |10|&1|02.
+109 |CR|02Message aborted...
+; Message reading: select read mode
+112 |CR|02(|10F|02)|02orward, |02(|10N|02)|02ew, |02(|10B|02)|02y You, |02(|10Y|02)|02ours, |02(|10S|02)|02earch, |02(|10Q|02)|02uit? |XX
+113 |02No messages found.
+114 |CR|02There are no messages in |MB.|DE|DE|DE
+; E-mail reader prompt
+115 |CR|02(|10A|02)gain, (|10P|02)revious, (|10N|02)ext, (|10R|02)eply, (|10D|02)elete, (|10J|02)ump, (|10Q|02)uit? |02
+; Message read prompt.  &1 = Current Msg #   &2 = Total Messages
+116 |CR|02[|10|&1 of |&2|02] |02Reading Messages (|10?|02/|10Help|02): |02
+118 |CR|02End of messages.
+; Post message TO:
+119 |CR|02To: |XX
+; post message SUBJ:
+120 |CR|02Subject: |XX
+; Files still in batch.   &1 = # of files
+121 |CR|02There are |10|&1 |02file(s) in your batch queue.|CR|CR|12Download them now? |11
+122 |02Saved
+123 |CL|02[|10þ|02] |02Searching for new electronic mail...|DE|CR
+124 |CL|02[|10þ|02] |02No new electronic mail waiting...|DE|DE
+; Electronic mail list header
+125 |CL|02Ú|$D77Ä|02¿|CR|02³|18 ± |00Electronic Mail|$D59 |16|02³|CR|02À|02|$D77ÄÙ|CR |10#|02##  |10F|02rom|07                            |10S|02ubject|07                           |10D|02ate|CR |02|$D77Ä
+; Electronic mail list format:
+; &1 = email number     &2 = email from
+; &3 = email subject    &4 = email date
+126  |10|$R05|&1|02|$R32|&2|10|$R32|&3|02|&4
+; Read new email? &1 = total &2 = unread
+127  |02|$D77Ä |CR |02[|10þ|02] |02You have |10|&1 |02messages (|10|&2 |02unread|02). Read them now? |02
+; First message in thread prompt
+128 |CR|02This is the first message in the thread.
+130 |02Scanning |10|MB|02...
+131 |CL|02New message scan completed.|DE|DE|DE
+; More Prompt Y)es N)o C)ontinuous
+; First word defines the hotkeys
+132 YNC |16|02[|10þ|02] |02More: |02(|10Y|02)|02es, |02(|10N|02)|02o, |02(|10C|02)|02ontinuous? |XX
+133 |CR|12|16WARNING: |02System event approaching in |10|NE |02minutes!|CR|PA
+136 |16|CR|CR|02Connection closed due to inactivity.
+137 |CR|02System Event: Disconnecting.
+; Who's online list header
+138 |CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00Who's Online|$D62 |02|16³|CR|02À|02|$D77ÄÙ|CR  |10N|02ode  |10U|02ser                       |10A|02ction|CR|02 |$D77Ä
+; Who's online list format:
+; &1 = node number      &2 = user name    &3 = action    &4 = location
+; &5 = connection type  &6 = gender       &7 = age       &8 = available?
+139   |02|$R05|&1 |10|$R26|&2 |02|&3
+; Who's online list footer
+140  |02|$D77Ä|CR |PA
+; Last callers list header &1 = Number of callers in list
+141 |CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00Last |&1 Callers |$D45 |$L06|TC total |02|16 ³|CR|02À|02|$D77ÄÙ|CR |10U|02ser|$D24 |10L|02ocation|$D19 |10N|02ode    |10D|02ate    |10T|02ime|CR |02|$D77Ä
+; Last 10 callers list format:
+; &1=Name &2=Node &3=Location &4=Date       &5=Time  &6=ConType &7=Caller#
+; &8=Addr &9=Note &0=Email    &A-&C=Opt 1-3 &D=Calls &E=TimeOn
+142  |10|$R27|&1 |02|$R25|&3 |$L04|&2   |&4  |&5
+; Last callers footer
+143 |02 |$D77Ä|CR|PA
+; Message from another node:
+; &1 = Message from     &2 = Node user is logged in to.
+144 |16|CL|10|18 ° |00Message from |00|&1 |00on node |00|&2|$X79 |02|16|CR
+; Message from another node footer. First word contains input keys, followed 
+145 RC |CR|02Node Message: |02[|10R|02]|02eply, |02[|10C|02]|02hat, or |02[|10ENTER|02/|10Continue|02]|02: |15
+146 |CR|02Send message to which node |02[|10?|02/|10List|02]|02: |XX
+; Send message to node prompt:
+; &1 = receiver's name       &2 = receiver's node number
+148 |CR|02Enter messsage for |10|&1 |02on node |10|&2|02:
+; Connection type text (6 words: local, telnet, rlogin, ssh, modem, other)
+150 |02LOCAL TELNET RLOGIN SSH MODEM OTHER
+151 |CR|02Enter your current password: |XX
+152 |CR|11(|101|02) |02MM/DD/YY|CR|11(|102|02) |02DD/MM/YY|CR|11(|103|02) |02YY/DD/MM|CR|CRDate Format |08-> |02
+153 |CR|02[|10þ|02] |02Enter terminal lines: |XX
+154 |CR|02(|100|02) |02Ascii (No Color)|CR|11(|101|02) |02Ansi  (Color)|CR|CR|02Graphics Mode |08-> |02
+156 |CR|02User not found.|DE|DE|DE
+; Line message editor: No quote data available
+158 |CR|02No quote data available...
+159 |CR|02Enter first line to quote: |XX
+160 |02Enter last line to quote : |XX
+; Email reply: not valid user. &1=username
+161 |CR|02|&1 is not a valid user on this system.
+; &1 = maximum length of each line     &2 = maximum number of lines
+162 |CR   |02Enter Your Text Now.  Enter /? for Help. (|&1 Chars/Line, |&2 Lines Max)
+163 |10[ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ:ÄÄÄÄ]|02
+; Line editor "backing up to line". &1 = new line number
+165 |02Backing up to line |&1.|02
+; Line editor "command" prompt.
+166 |CR|02Command |02[|10?|02/|10Help|02]|02: |XX
+; Line editor "command" prompt help
+167 |CR|02(|10A|02)bort Message    (|10C|02)ontinue Message     (|10U|02)pload Message|CR(|10Q|02)uote Message    (|10S|02)ave Message         (|10H|02)elp|CR(|10T|02)itle Change
+; Archive list format:
+; &1 = archive number    &2 = archive name       &3 = archive extension
+170 |02|$R02|&1  |10|$R22|&2 |02|&3
+171 |02|$D30Ä|CR|02[|10þ|02] |02Select Archive #: |XX
+172 |CR|02Deposit how many minutes |02[|100|02-|10|TL|02]|02: |XX
+173 |CR|02Withdraw how many minutes |02[|100|02-|10|TB|02]|02: |XX
+; Message group list header
+174 |CL|CR|$D13 |02Ú|$D54Ä|02¿|CR|$D13 |10³|18 ± |00Message Groups|$D37 |16|02³|CR|$D13 |02À|02|$D54ÄÙ|CR|$D14 |10#|02#   |10M|02essage |10G|02roup |10N|02ame|07|$D24 |02A|10reas|CR|$D14 |02|$D54Ä
+; Message group list format
+; &1 = Group number     &2 = Group name     &3 = Total Areas in Group
+175 |$D14 |02|$R04|&1 |10|$R41|&2 |02|&3
+; Message group list prompt
+177 |$D14 |02|$D54Ä|CR|$D14 |02[|10þ|02] |00Select Message Group |02[|10Enter|02/|101|02]|02: |XX
+; 179-180 are System broadcast messages header/footer
+; &1 = User who sent system broadcast
+; &2 = Node Number
+179 |16|CL|10|18 ° |00System Notification|$X79 |02|16|CR|CR
+180 |CR||02PA
+; nodechat text: &1 = user name  &2 = node number  &3 = node color (low)
+; &4 = node color (hi)
+181 |02|&3<|&4|&1|&3> |02
+; Theme select header
+182 |CR|02Available themes:|CR
+; Theme select format:
+; &1 = Theme number       &2 = Theme description
+183    |10|&1 |02..... |10|&2
+; Theme select footer
+184 |CR|02Select your theme |02[|10Enter|02/|10Default|02]: |02
+; new user: use full screen node chat?
+187 |CR|12Use full screen node chat? |02
+; One Liner header
+188 |CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00One Liners|$D64 |02|16³|CR|02À|02|$D77ÄÙ|CR
+; One liner prompt
+189 |CR |02|$D77Ä|CR |02[|10þ|02] |02Add to the one liners? |02
+190 |CR|02[|10þ|02] |02Enter your one liner:|CR
+; Archive view header  &1 = Filename
+192 |16|CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00Viewing Contents of Archive|$L46|&1 |16|02³|CR|02À|02|$D77ÄÙ|CR |10F|02ile |10N|02ame|07|$D48 |10S|02ize   |10D|02ate    |10T|02ime|CR |02|$D77Ä
+; Archive view format
+; &1 = File Name    &2 = File Size    &3 = File Date    &4 = File Time
+193  |02|$R49|&1 |$L11|&2 |&3 |&4
+; Archive view footer
+194  |02|$D77Ä|CR
+; File mask search prompt
+195 |CR|02Enter File Mask (Enter for All):|CR
+; File search prompt
+196 |CR|02Enter text to search for:|CR:
+; Search all file bases?
+197 |CR|02[|10þ|02] |02Search all file bases ? |02
+; File search completed
+198 |CL|02File search completed.|DE|DE|DE
+199 |CR|02This is the last message in the thread.
+; Select scanned file bases header
+200 |CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00File Scan Settings|$L55|FG |02|16³|CR|02À|02|$D77ÄÙ|CR |10#|02#  |10S|02can |10F|02ile |10B|02ase |10N|02ame                |10#|02#  |10S|02can |10F|02ile |10B|02ase |10N|02ame|CR |02|$D77Ä
+; Select scanned file bases display format
+; &1 = File base number      &2 = File base name      &3 = Scan? (Yes or No)
+201  |02|$R04|&1|10|$R03|&3  |02|$R29|&2
+; Select scanned file bases prompt
+202 |02Toggle: |02[|10#-#,#|02], Select [|10A|02]dd All, [|10R|02]emove All, [|10?|02/|10List|02]: |XX
+; &1 = File base name
+203 |CR |02|&1 will NOT be scanned in new file scan!|CR
+; &1 = File base name
+204 |CR |02|&1 will be scanned in new file scan!|CR
+; Displayed if file already exists when user trys to upload.
+205 |02File already exists.|DE|DE|DE
+; Displayed before running uploads processor
+206 |12þ |02Testing file for errors       : |XX
+; File description input line.  &1 = Line number
+207 |02:
+; Default file description if none entered/found.
+208 |02No Description
+; Displayed if the user reaches the max time allowed in time bank!
+209 |CR|02You are only allowed to store |SB minutes in the time bank!
+; Read Message personal prompt.  &1 = Current Msg #     &2 = Total Messages
+213 |CR|02[|10|&1 of |&2|02] |02Reading Messages (|10?|02/|10Help|02): |12
+; File group list header
+214 |CL|CR|$D13 |02Ú|$D54Ä|02¿|CR|$D13 |02³|18 ± |00File Groups|$D40 |16|02³|CR|$D13 |02À|02|$D54ÄÙ|CR|$D14 |10#|02#   |10F|02ile |10G|02roup |10N|02ame|10|$D29 |02A|10reas|CR|$D14 |02|$D54Ä
+; File group list prompt
+217 |$D14 |02|$D54Ä|CR|$D14 |02[|10þ|02] |02Select File Group |02[|10Enter|02/|101|02]|02: |XX
+; Displayed when creating a new files list
+219 |CL|CR|$D10 |02Ú|$D58Ä|02¿|CR|$D10 |02³|18 ± |00Creating text listing of new files        NEWFILES.TXT |16|02³|CR|$D10 |02À|02|$D58ÄÙ
+; Displayed when creating an all files list
+220 |CL|CR|$D10 |02Ú|$D58Ä|02¿|CR|$D10 |02³|18 ± |00Creating text listing of all files        ALLFILES.TXT |16|02³|CR|$D10 |02À|02|$D58ÄÙ
+; File list compiler header
+221 |$D11 |10F|02ile |10B|02ase |10N|02ame|$D30 |10F|02iles    |10A|02dded|CR|$D11 |02|$D58Ä
+; File list compiler Working text
+222 |$D11 |02[|10þ|02] |02Working|02...
+; File list compiler status format
+; &1 = File Base Name   &2 = File Size   &3 = # of files added to list
+223 |$D11 |02|$R42|&1 |$L06|&2   |$L06|&3
+; File list compiler footer
+225 |$D11 |02|$D58Ä
+; nodechat: info/status text
+226 |02- |02
+; Compress file list prompt
+227 |$D11 |02[|10þ|02] |02Compress list with |QA? |02
+; QWK Download: No Messages
+228  |02|$D77Ä|CR |10No new messages found.|DE|DE|DE
+; nodechat action text: &1 = user name
+229 |10* |&1 |XX
+; QWK process list header
+230 |CL|02Ú|$D77Ä|02¿|CR|02³|18 ± |00Preparing QWK Mail Packet|$D49 |16|02³|CR|02À|02|$D77ÄÙ|CR |10#|02###  |10M|02essage |10B|02ase |10N|02ame|07|$D25 |10Q|02WK |10N|02ame|07         |10M|02sgs   |10A|02dded|CR |02|$D77Ä
+; QWK "working" text
+231  |02[|10þ|02] |02Working|02...
+; QWK process list format
+; &1 = Base Number      &2 = Base Name           &3 = QWK Name
+; &4 = # of Msgs        &5 = # of Message Added
+232  |02|$L04|&1  |$R40|&2  |$R13|&3  |$L06|&4  |$L06|&5
+; QWK process list footer
+; &1 = Total messages in packet   &2 = Total # of bases processed
+233  |02|$D77Ä|CR |02[|10þ|02] |10|&1 |02messages in |10|&2 |02bases
+; Displayed when compressing QWK packet
+234 |CR |02[|10þ|02] |02Creating |10|QA |02archive...
+; Update last read pointers?
+236 |CR |02[|10þ|02] |02Update last read pointers? |02
+; Node chat scroll mode back
+237 |02Scrollback:  (Up/Down) Move  (Ctrl-R) Page Up  (Ctrl-C) Page Down  (ESC) Quit
+; Processing QWK reply packet
+240 |CR|02[|10þ|02] |02Processing QWK reply packet|02: |XX
+; Voting booth header
+241 |CL|02|$D79Ä|CR|02Voting Booth |10(* = New Question)|CR|02|$D79Ä
+; Voting booth question list format
+; &1 = Question #       &2 = Question Text       &3 = New Question?
+242  |10|&3 |02(|10|$R02|&1|02) |02|$R71|&2
+; Voting booth prompt                  &1 = Total number of questions
+244 |02|$D79Ä|CR|02Vote on which question (1-|&1, or Enter/Quit): |XX
+; Voting on question header            &1 = Question
+245 |CL|02|$D79Ä|CR|02Question: (* = Current Vote)|CR|10|&1|CR|02|$D79Ä
+; Voting on question list format
+; &1 = Answer #         &2 = Answer text    &3 = Current Answer?
+246  |02|&3 |02(|10|$R02|&1|02) |10|&2
+; Voting prompt
+247 |02|$D79Ä|CR|02Vote for which answer (Enter/Quit): |XX
+; Vote Result Header
+; &1 = Question    &2 = Total Votes for this Question
+249 |CL|02|$D79Ä|CR|02Results for Question: (|&2 votes)|CR|10|&1|CR|02|$D79Ä|CR |10#|02#|$D43 |10V|02otes  |10P|02ercentage|CR|02|$D79Ä
+; Vote Result list format
+; &1 = Answer #    &2 = Answer Text         &3 = Votes on this question
+; &4 = Percentage  &5 = Percentage Bar (20 chars long)
+250 |02(|10|$R02|&1|02) |02|$R40|&2 |10|$R05|&3  |10|$L03|&4% |&5|16
+; Vote Result Footer
+251 |02|$D79Ä|CR|PA
+; <Pick this to add your own answer> text
+252 |02<Pick this to add your own answer>
+; Enter your answer prompt
+253 |CR|02Enter your response: |XX
+254 |CR|02This is a forced question.  You must answer it to continue.|CR|CR|PA
+255 |CR|02Enter new file scan date |02[|10|UF|02]|02: |XX
+; &1 = Date of the updated new scan.
+257 |CR|02New scan date set to [|10|&1|02].|DE|DE|DE
+258 |CR|02Detecting terminal emulation: |XX
+259 |02|TE detected.
+; Short BBS list header
+260 |CR|02Õ|02Í[ |10B|02BS |10N|02ame |02]Í|02ÍÍÍÍÍÍÍÍÍÍÍ|02Í[ |10T|02ype |02]|02Í|02Í[ |10A|02ddress |02/ |10P|02hone |02]Í|02ÍÍÍÍÍÍÍ|02Í[ |10S|02oftware |02]Í|02¸
+; Short BBS list format
+; &1 = bbs name  &2 = type  &3 = phone/addr  &4 = software
+261 |02³ |10|$R25|&1 |02|$R06|&2  |10|$R30|&3 |02|$R10|&4 |02³
+; Short BBS list footer
+262 |02ÔÍ|02ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ|02ÍÍ¾
+263 |02|$D79Ä|CR|02Results for which question? (Enter/Quit): |XX
+; Extended BBS list header
+264 |CR|02Extended BBS listing:
+; Extended BBS list information
+; &1 = bbs name   &2 = type  &3 = telnet   &4 = software  &5 = location
+; &6 = sysop name &7 = baud  &8 = added by &9 = phone     &0 = verified
+265 |CR|02BBS Name       : |10|&1|CR|02BBS Type       : |10|&2|CR|02Telnet Address : |10|&3|CR|02Phone Number   : |10|&9|CR|02Max Baud Rates : |10|&7|CR|02Location       : |10|&5|CR|02Sysop Name     : |10|&6|CR|02Software       : |10|&4
+; Extended BBS list prompt
+267 |CR|02(Enter) to Continue, (D)elete, (V)erify, or (Q)uit? |XX
+; Who's Online: blank listing.  |&1 = Node number
+268   |02|$R05|&1 Waiting for connection
+; Matrix login: Matrix password prompt.   |&1 = Matrix password
+270 |CR|02Matrix password is |10|&1|02.|CR|CR|PA
+; Matrix login: Your account is not validated.
+271 |CR|02Sorry, your account has not been validated.|CR|CR|PA
+; Matrix login: Enter matrix password
+272 |CR|02Enter matrix password: |XX
+; Matrix login: Enter account name prompt
+273 |CR|02Account name    |02: |XX
+; Matrix login: enter account password prompt
+274 |CR|02Account password|02: |XX
+; Maximum of 20 voting questions text
+276 |CR|02Sorry, there is a maximum of 20 voting questions.
+; Enter new question
+277 |CR|02Enter new question (Enter/Quit)|CR|02:
+; Choice #.  &1 = Choice number
+279 |02Choice #|&1: |XX
+; Move message to where?
+282 |CR|02Move to which base (|10?|02/|10List|02): |XX
+; Add BBS list: enter phone number
+283 |02Enter BBS phone number: |XX
+; Add BBS list: enter BBS name
+284 |02Enter BBS Name        : |XX
+; Add BBS list: enter BBS location
+285 |02Enter Location of BBS : |XX
+; Add BBS list: enter sysop name
+286 |02Enter Sysop Name      : |XX
+; Add BBS list: enter max baud rate
+287 |02Enter Max Baud Rate   : |XX
+; Add BBS list: enter BBS software
+288 |02Enter BBS Software    : |XX
+; File base is mandatory
+289 |CR |02|FB is marked as mandatory scanning.|CR
+; BBS list: enter text to search for
+292 |CR|02Enter search text or (ENTER) for All: |XX
+; editing message display
+296 |16|CL|02|18 ° |00Message Editing |$X79 |16|CR|CR|02(|10A|02)      |02To: |10|&1|CR|02(|10B|02) |02Subject: |10|&2|CR|02(|10C|02)    |02Sent: |10|&3|CR|CR|02Edit option (|10!|02) Edit text, (|10Q|02)uit? |02
+; editing message to
+297 |CR|02To: |XX
+; editing message net address
+298 |CR|02Enter destination address: |XX
+; editing message subject
+299 |CR|02Subject: |XX
+302 |CR|02|MB is marked as mandatory reading|CR
+; Editor type prompt
+303 |CR|02(|100|02) |02Line Editor|CR|02(|101|02) |02Full Screen Editor|CR|02(|102|02) |02Ask|CR|CR|02E|02d|02itor |02T|02y|02pe|02: |02
+; Archive view command prompt (download access allowed)
+304 |CR |02[|10þ|02] |02Archive View: |02(|10R|02)|02e-list, |02(|10V|02)|02iew File, |02(|10D|02)|02ownload File or |02(|10Q|02)|02uit: |02
+; Viewing text file &1 = Filename
+306 |16|CL|02Ú|$D77Ä|02¿|CR|02³|18 ± |00Viewing Contents of File|$L49|&1 |16|02³|CR|02À|02|$D77ÄÙ|CR|02
+; Line editor forced message cannot abort
+307 |CR|02This is a forced message.  You cannot abort it.|CR|CR|PA
+308 |CL|12Invisible login? |02
+; Message search: search text input
+310 |DFmsgsearch||CR|02Enter text to search for: |02
+; Message search completed
+311 |CL|02Message search completed.|DE|DE|DE
+; Ask for character translation (DOS CP437 or UTF8)
+; &1 = Detected terminal type (or Unknown)
+315 |CR|02[|100|02] MS-DOS CP437|CR[|101|02] UTF-8|CR|CRSelect Terminal Codepage [|10Enter = CP437|02]: |XX
+; Lightbar Y/N: YES text
+316 |10|18 Y|00es |10|16 N|02o |00|16
+; Lightbar Y/N: NO text
+317 |10 Y|02es |18|10 N|00o |00|16
+; Moving message. &1=base name
+318 |CR|02Moving message to |10|&1|02...
+; nodechat broadcast text: &1 = user name
+319 |02<|10|&1 |02broadcast> |02
+; File list type prompt
+320 |CR|02(|100|02) |02Normal   |02: |02View file lists page by page|CR|02(|101|02) |02LightBar |02: |02Scroll through lists with arrow keys|CR|CR|02S|02ele|02ct |02F|02il|02e |02L|02is|02t |02T|02yp|02e: |02
+; ASCII graphics not supported for BBS login.
+321 |02Sorry, this BBS does not support ASCII graphics.
+; ANSI graphics not supported for BBS login.
+322 |02Sorry, this BBS does not support ANSI graphics.
+; Lightbar file list prompt
+323 |02(|10Space|02) |02Flag       |02(|10N|02) |02Next Base       |02(|10V|02) |02View       |02(|10ESC|02) |02Quit       |02(|10?|02) |02Help
+326 |CR|02Export to Filename|CR:
+327 |CR|02Message exported to |&1.
+; Archive view command prompt (download access not allowed)
+328 |CR |02[|10þ|02] |02Archive View: |02(|10R|02)|02e-list, |02(|10V|02)|02iew File, or |02(|10Q|02)|02uit: |02
+; Add to BBS list: telnet
+330 |02Enter Telnet Address  : |XX
+; Start at message index in email? (lightbar msg reader)
+331 |CR|12Start at e-mail message index? |02
+; Teleconference user list
+332 |CL|02Ú|$D77Ä|02¿|CR|02³|18 ± |00Users currently in Teleconference|$D41 |02|16³|CR|02À|02|$D77ÄÙ|CR |10U|02ser|$D28 |10R|02oom  |10T|02opic|CR |02|$D77Ä
+; Teleconference user list format
+; &1 = User's Name  &2 = User's node number  &3 = Room number  &4 = Room name
+333  |10|$R31|&1 |02(|10|$R02|&3|02)  |12|&4
+; Jump to which message prompt.  &1 = Current Message  &2 = Total messages
+334 |CR|02Jump to which message? (1-|&2): |XX
+335 |CR|02[|10þ|02] |02Use signature in posted messages? |02
+336 |02You have not defined an auto-signature yet.|CR
+; One Liners list format.  &1 = Text   &2 = Poster Name   &3 = Initials
+337 |02 |$R61|&1 |$L15|&2
+; Reading forward prompt          &1 = Total messages in base
+338 |CR|02Begin reading at (|101|02-|10|&1|02)|02: |XX
+; Lightbar file list prompt (SYSOP)
+339 |02(|10Space|02) |02Flag     |02(|10E|02) |02Edit     |02(|10N|02) |02Next     |02(|10V|02) |02View     |02(|10ESC|02) |02Quit     |02(|10?|02) |02Help
+; Lightbar file list uploaders name    &1 = user name      &3 = downloads
+340 |$D34 |02+ Uploader: |&1
+; Line editor quote mode:  &1 = line number      &2 = line text
+341 |10|&1|02: |02|$R74|&2
+; Netmail destination address (if no nodelist data)
+342 |CR|02Enter destination netmail address: |XX
+; Upload file name prompt
+343 |CR|02File Name|CR:
+; Download file name prompt
+344 |CR|02File Name|CR:
+; User status: user logging in
+345 |02Logging In
+; User status: Browsing Menus
+346 |02Browsing Menus
+; User status: Teleconference
+347 |02Teleconference
+; User status: Reading messages
+348 |02Reading messages
+; User status: Posting message
+349 |02Posting message
+; User status: Listing files
+350 |02Listing files
+; User status: Transfering files
+351 |02Transfering files
+; Line editor: Message upload "File Name:" prompt
+352 |CR|02File Name|CR:
+; Archive view "File Name:" prompt
+353 |CR|02File Name|CR:
+; TELNET/RLOGIN: Connecting prompt &1 = address &2 = port
+354 |CR|08> |02Escape sequence is |08|10CTRL+|10]|02.|CR|08> |02Connecting to |10|&1 |02port |10|&2|02.|CR
+; TELNET/RLOGIN: Connected successfully
+355 |08> |02Connected.
+; file list tagging prompt
+357 |CR|02[|10þ|02] |02Add which file number to batch |02(|10Enter|02/|10Quit|02)|02: |XX
+; file list view prompt
+358 |CR|02[|10þ|02] |02View contents of which file number |02(|10Enter|02/|10Quit|02)|02: |XX
+; Protocol List Header
+359 |CR|02Available Protocols:|CR
+; NodeMsg reply &1=from &2=node#
+360 |CR|02Sending reply to |10|&1 |02on node |10|&2|02:
+; Add BBS list connection type
+361 |CR|02Accessible by (D)ialup, (T)elnet, (B)oth: |XX
+; Msg xport: local export path
+363 |CR|02Enter full path/filename to export to:|CR|XX
+; info edit: address
+364 |CR|02Enter your street address.|CR|02:
+; info edit: city/state
+365 |CR|02Enter your city & state.|CR|02:
+; info edit: zipcode
+366 |CR|02Enter your postal code: #####|CR|02:
+; info edit: home phone
+367 |CR|02Enter yours home phone number:|CR|02:
+; info edit: data phone
+368 |CR|02Enter your data phone number:|CR|02:
+; info edit: bday
+369 |CR|02Enter your date of birth (|UF):|CR|02:
+; info edit: gender
+370 |CR|02Are you (M)ale or (F)emale? |XX
+; info edit: date format
+371 |CR|02(|101|02) |02MM/DD/YY|CR|02(|102|02) |02DD/MM/YY|CR|02(|103|02) |02YY/DD/MM|CR|CRDate Format |08-> |02
+372 |CR|02Enter terminal lines: |XX
+; info edit: editor type
+373 |CR|02(|100|02) |02Line Editor|CR|02(|101|02) |02Full Screen Editor|CR|02(|102|02) |02Ask|CR|CR|02E|02d|02itor |02T|02y|02pe|02: |02
+; info edit: file list type
+374 |CR|02(|100|02) |02Normal   |02: |02View file lists page by page|CR|02(|101|02) |02LightBar |02: |02Scroll through lists with arrow keys|CR|CR|02S|10ele|02ct |02F|02il|02e |02L|02is|02t |02T|02yp|02e: |02
+; Processing uploads
+376 |CL|02Processing uploads ...|CR
+; BLIND dupe search
+377 |12þ |02Searching for duplicate files : |XX
+; BLIND no dupe found
+379 |02None
+; importing file_id.diz
+380 |12þ |02Importing file description    : |XX
+; file_id found
+381 |02Found
+; no file_id
+382 |02None
+; Post on message base (standard reader)
+383 |12Post on |10|MB|12? |XX
+; View text file filename prompt
+384 |CR|02File name|CR:
+; Download OK &1 = filename
+385 |02- Transfer of |10|&1|02: OK
+; Download failed &1 = filename
+386 |02- Transfer of |10|&1|02: |12Failed!
+; Mass mail prompt
+387 |CL|02Send mass mail by|02:|CR|CR|10(|1|02) |02ACS level|CR|10(|032|02)|02 List of users|CR|10(|033|02)|02 All users|CR|10(|03Q|02)|02 Quit|CR|CRCommand |08-> |02
+; Mass mail ACS prompt
+388 |CR|10Enter ACS level: |XX
+; Mass mail name info
+389 |CR|10Enter user name, or search string.|CREnter a blank line to end.|CR
+; Mass mail name prompt &1 = # of users in list
+390 |CR|10|&1 |02users in list.  Enter user name: |XX
+; Mass mail name list
+391 |CR|02User mailing list:|CR
+; Mass mail name format &1 = name
+392    |02|&1
+; Sending mass mail
+394 |CR|CR|02Sending mass e-mail, please wait ...
+; Node unavilable
+395 |CR|02Sorry, this user is marked as unavailable.
+; Msg search prompt from read messages menu command
+396 |DFmsgsearch||CR|02Enter text to search for: |XX
+; Info edit: Msg Read type
+397 |CR|02(|100|02) |02Normal   |02: |02View messages page by page|CR|02(|101|02) |02LightBar |02: |02Scroll message lists with arrow keys|CR|CR|02S|02ele|02ct |02T|02yp|02e: |02
+; New user: Msg Read type
+398 |CR|02(|100|02) |02Normal   |02: |02View messages page by page|CR|02(|101|02) |02LightBar |02: |02Scroll message lists with arrow keys|CR|CR|02S|02ele|02ct |02T|02yp|02e: |02
+; Ansi msg read: index list format
+; &1 = msg #   &2 = subject   &3 = from   &4 = to   &5 = new?
+399 |02|&5|02|$L04|&1 |$R40|&2 |$R15|&3 |$R15|&4
+; Ansi msg read: index list highlight
+; &1 = msg #   &2 = subject   &3 = from   &4 = to   &5 = new?
+400 |12|&5|10|23|$L04|&1|16
+; Ansi msg read: index list highlight OFF
+; &1 = msg #   &2 = subject   &3 = from   &4 = to   &5 = new?
+401 |02|&5|02|$L04|&1
+; Ansi msg read: jump to msg: &1 = cur msg num  &2 = high msg num
+403 |CR|02Jump to which message? (|101|02-|10|&2|02): |02
+; Ansi msg read: scan toggle  &1 = message base name
+404 |CR|02|&1 will NOT be scanned in new message scan!
+405 |CR|02|&1 will be scanned in new message scan!
+406 |CR|02|MB is marked as mandatory reading!
+; Reply msg To: standard
+407 |CR|02To: |XX
+; Reply msg To: lightbar
+408 |CR|02To: |XX
+411 |CR|10Msg #  From                 To                   Subject|CR|02|$D79-
+412 |10|$L05|&5  |10|$R20|&1 |$R20|&2 |10|$R30|&3
+413 |02|$D79-|CR|PA
+; ansi msg read: export to file
+414 |02Export to filename|CR:
+; ansi msg read: local export
+415 |02Export to filepath/filename|CR:
+; mass email subj: prompt
+416 |CR|02Subject: |XX
+; INFO EDIT: PW prompt
+419 |CR|02Enter your desired password. It should have a minimum of:|CR|&1 characters, |&2 capital letter(s), |&3 number(s), and |&4 symbol(s)|CR|CR|02Password: |XX
+; INFO EDIT: Verify PW
+421 |CR|02Enter your password again for verification.|CR|CR|02Password: |XX
+; Upload: No files found
+424 |CR|02No files found!|CR|CR|PA
+; File list compile: No files found
+425 |$D11 |02No files found.|DE|DE|DE
+426 |CR|02You cannot login to more than one node at a time.|CR|CR|PA
+; nodechat input &1 = username
+427 |02<|10|&1|02> |02
+; Batch queue list footer
+428 |02 |$D77Ä
+; msg scan setting footer
+430 |02|$D77Ä|CR
+; Lightbar file list: #/filename:
+; &1 = filenum, &2 = filename, &3 = tag char &4 = size &5 = date &6 = DLs
+431 |16 |10|&1|12|&3|10|$R57|&2 |10|$L07|&4 |&5
+; Lightbar file list: highlight on: &1 = #, &2 = filename, &3 = tag char
+432 |16 |10|23|&1|16|12|&3
+; Lightbar file list: highlight off: &1 = #, &2 = filename, &3 = tag char
+433 |16 |10|&1|12|&3
+; Lightbar file list: description/info
+; &1 = size, &2 = date, &3 = DLs, &4 = desc, &5 = uploader
+434 |02|$D29 |&4
+; Lightbar file list, ext desc: &4 = description
+435 |02|$D29 |&4
+; Lightbar file list, uploaded by: &5 = uploader
+436 |02|$D29 + Uploader: |&5
+; Standard file list, uploaded by: &5 = uploader
+437 |02|$D29 + Uploader: |&5
+; new user: enter email address
+439 |02[|10þ|02] |02Enter your e-mail address       -> |XX
+; info edit: enter email address
+440 |CR|02Enter E-mail address|CR:
+; new user: enter user note
+441 |CR|02Enter your desired user note|CR:
+; info edit: enter user note
+442 |CR|02Enter your desired user note|CR:
+; new user: option 1
+443 |02[|10þ|02] |02How did you hear of this BBS    -> |XX
+; info edit: option 1
+444 |CR|02Enter optional field 1: |XX
+; new user: option 2
+445 |CR|02Enter optional field 2: |XX
+; info edit: option 2
+446 |CR|02Enter optional field 2: |XX
+; new user: option 3
+447 |CR|02Enter optional field 3: |XX
+; info edit: option 3
+448 |CR|02Enter optional field 3: |XX
+; file new scan setting footer
+449 |02|$D77Ä|CR
+; private post (email) TO:
+450 |CR|02To: |XX
+; reply msg SUBJ
+451 |CR|02Subject: |XX
+; standard quote header
+452 |02Quote mode: Select a range of text to quote|CR
+; node chat: show users in chat footer
+453  |02|$D77Ä|CR|PA
+; history header
+455 |CL|02Daily System History|CR|CR  Date    Calls  New    Posts  Email  DLs    DLkb       ULs    ULkb|CR|02|$D79-
+; history list
+; &1=date  &2=calls  &3=newusers  &4=posts  &5=emails  &6=dls  &7=dlkb
+; &8=uls   &9=ulkb
+456 |10|&1  |$R05|&2  |$R05|&3  |$R05|&4  |$R05|&5  |$R05|&6  |$R09|&7  |$R05|&8  |&9
+; history footer &1=total days
+457 |08|$D79-|CR|02* Total days: |&1|CR|CR|PA
+; msg scan date prompt
+458 |CR|02Enter new message scan date |02[|10|UF|02]|02: |02
+; msg scan date: updating pointers
+460 |CR|02Updating pointers: Please wait...
+; Filename greater than max chars prompt  &1=Max length
+461 |CR|12File of this name already exists.|CR|CR|02Enter new filename (max |&1 chars)|CR:
+; line editor edit subject
+462 |CR|02Enter new subject: |XX
+; msgtext quote header &1=date &2=from &3=initials &4=time
+464 |02On |10|&1|02, |10|&2 |02said the following...
+; new email node msg: &1=from  &2=subj
+465 |02You've just received new e-mail from |10|&1|02.
+466 |02UNUSED
+467 |02UNUSED
+468 |02UNUSED
+469 |02UNUSED
+470 |02UNUSED
+471 |02UNUSED
+472 |02UNUSED
+473 |02UNUSED
+474 |02UNUSED
+; Password inquiry prompt
+475 |CL|12Send a password inquiry message to the SysOp? |02
+; Displayed when account expired down to a security level > 0
+476 |CR|02Your account has expired.  Downgrading security to |XS.
+; User required password change
+478 |CR|02This BBS requires a password change every |PW days.
+; User2User chat page which node?
+479 |CR|02Enter node to chat with |02[|10?|02/|10List|02]|02: |XX
+; User2User node/user is unavailable
+480 |CR|02That user is marked unavailable.|CR|CR|PA
+; User2User sending chat request &1=User &2=Node
+482 |CR|02Sending chat request to |&1...|DE|DE|CR
+; User2User chat mode starting
+483 |16|CL|02|18 ° |00Chat mode engaged.|$X70 ESC/Quit |16|CR
+; User2User chat mode ended
+484 |10|CL|02|18 ° |00Chat mode end.|$X79 |02|DE|DE
+; User2User accept chat page request? &1=user &2=Node
+485 |16|CL|02|&1 is requesting private user chat.  Accept? |02
+; MsgBase quickscan Scanning prompt
+; &1=basename  &2=current base#  &3=total bases#
+487 |02Scanning |10|&1 |02[|10|&2 |02of |10|&3|02]|02...
+; MsgBase quickscan base list prompt
+; &4=msgs in base    &5=new messages  &6=your messages  &7=global total msg
+; &8=global new msgs &9=global your msgs
+488 |02Base: |10|$R40|&1 |02Total: |10|$L04|&4|02 New: |10|$L04|&5 |02Yours: |10|$L03|&6
+; MsgBase quickscan footer prompt
+; &7=global total msg   &8=global new msgs   &9=global your msgs
+489 |CR|02Quick Scan complete. |CR|CR|PA
+; Msg header flags text one word each separated by a comma
+; 1=Local 2=Echo 3=Private 4=Sent 5=Delete, 6=Received
+490 |02Local,Echo,Priv,Sent,Del,Read
+; File base filesize flags one word separated by a space
+; 1=offline  2=failed  3=unvalidated  4=GB  5=MB  6=KB  7=B
+491 |02OFFLINE FAILED UNVALID GB MB KB B
+; Forward msg: which base
+492 |CR|02Forward message to which base (|10?|02/|10List|02): |02
+; Sysop password prompt
+493 |CR|02Sysop Password: |XX
+; Normal msg reader: Remove from newscan? (after I command)
+494 |CR|12Remove |10|MB |12from message newscan? |XX
+; Lightbar msg reader: Remove from newscan (after I command)
+495 |CR|12Remove |10|MB |12from message newscan? |XX
+; Netmail send address prompt with active nodelist searching
+496 |CR|02Enter netmail address or search criteria (|10?|02/|10Help|02): |02
+; Nodelist browser prompt
+497 |CR|02Enter nodelist search criteria (|10?|02/|10Help|02): |02
+; Nodelist search results header
+498 |CR|02Node         System Name                Location           SysOp               |CR|02============ ========================== ================== ====================
+; Node list search results
+; &1=addr  &2=bbsname  &3=location  &4=sysop  &5=phone  &6=internet
+499 |10|$R12|&1 |02|$R26|&2 |10|$R18|&3 |02|$R20|&4
+; Node list single result
+500 |CR|02    Address: |10|&1|CR|02System Name: |10|&2|CR|02   Location: |10|&3|CR|02   Operator: |10|&4|CR|02      Phone: |10|&5|CR|02   Internet: |10|&6
+; Node list search  "found X matches"  &1=# of matches
+501 |CR|02Found |10|&1 |02matches.
+; Netmail send confirmation
+; &1=addr  &2=bbsname  &3=location  &4=sysop  &5=phone  &6=internet  &7=to
+502 |CR|12Send netmail to |10|&7|02 at |10|&1|12? |11
+; QWK .REP complete/results prompt
+; &1=msgs imported  &2=msgs failed  &3=bases added to scan  &4=bases removed
+503 |10SUCCESS|02.|CR|CR|10- |02Posted |10|&1 |02new messages (|10|&2 |02failed)|CR|10- |02Added |10|&3 |02bases to new scan (|10|&4 |02removed).|CR|CR|PA
+; Standard message reader: Lastread pointer set &1 = msg number
+504 |CR|10Last read pointer has been set to message number |&1.|CR|CR|PA
+; Lightbar reader: Lastread pointer set &1 = msg number
+505 |CR|10Last read pointer has been set to message number |&1.|CR|CR|PA
+; QuickScan message list header    &2=basename
+506 |02From            Base                 Subject|CR|02=============== ==================== ==========================================
+; QuickScan message list middle
+; &1=msg#  &2=basename  &3=from  &4=to  &5=subject  &6=date
+507 |10|$R15|&3 |02|$R20|&2 |10|$R42|&5
+; QuicScan message list footer
+508 |02|$D79=|CR
+; Message reply options (standard)
+; &1=base name  &2=reply to name   &3=msg subject
+509 |16|CL|10|18 ° |00Message Reply |$X79 |16|CR|CR|02    Area: |10|&1|CR      |02To: |10|&2|CR|02 Subject: |10|$R65|&3|CR|CR|02Reply area (|10ENTER|02) Current, |02(|10B|02)ase, |02(|10E|02)mail, |02(|10Q|02)uit? |02
+; Message reply options (lightbar)
+; &1=base name  &2=reply to name   &3=msg subject
+510 |16|CL|10|18 ° |00Message Reply |$X79 |16|CR|CR|02    Area: |10|&1|CR      |02To: |10|&2|CR|02 Subject: |10|$R65|&3|CR|CR|02Reply area (|10ENTER|02) Current, |02(|10B|02)ase, |02(|10E|02)mail, |02(|10Q|02)uit? |02
+; Message reply select base prompt
+511 |CR|02Select message base for reply [|10?|02/|10List|02]: |02
+; Message "replying to X base" prompt   &1=base name
+512 |CR|02Posting reply message to base |10|&1|02.
+; Terminal emulation for TE mci code
+; word1=ASCII   word2=ANSI
+516 |02ASCII ANSI
+; UB results (File list type)
+; word1=Normal  word2=Lightbar
+517 |02Normal Lightbar
+; UE results (message editor type)
+; word1=line,   word2=full   word3=ask
+518 |02Line Full Ask
+; UG results (gender/sex)
+; word1=female   word2=male   word3=undisclosed
+519 |02Female Male Unknown
+; UJ results (message reader type)
+; word1=Normal   word2=Lightbar
+520 |02Normal Lightbar
+; UQ results (lightbar quote style)
+; word1=standard   word2=windowed
+521 |02Standard Windowed
+; Yes and No text used in various places
+; Word 1 is the No Yes hotkeys, Word 2 is No, Word 3 is Yes
+522 |02NY No Yes
+; Off and On text used in various places
+; Word1=Off   word2=On
+523 |02Off On
+; New scan toggle yes/no (on/off) toggle text
+; Word1=no   word2=Yes
+524 |02No Yes
+; Editing auto signature message subject
+525 |02Signature Editor
+; Months of the year (short name) one word per, Jan-Dec separated by a space
+526 |02Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+; Months of the year (long name) one word per, Jan-Dec separated by a space
+527 |02January February March April May June July August September October November December
+; Download batch file queue via FTP/WEB prompt
+528 |CR|02Download via [|10W|02]eb Site, [|10F|02]tp Site, or [|10ENTER|02/Protocol]? |02
+; Download batch file queue via FTP prompt
+529 |CR|02Download via [|10F|02]tp Site, or [|10ENTER|02/Protocol]? |02
+; Download batch file queue via WEB prompt
+530 |CR|02Download via [|10W|02]eb Site, or [|10ENTER|02/Protocol]? |02
+; Download batch queue URL prompt   &1 = URL link
+531 |CR|02Download your files at the following site (expires in 1 hour):|CR|CR|10|&1|CR|CR|PA
+; Message draft header
+532 |16|CL|02Ú|$D77Ä|02¿|CR|10³|18 ± |00Saved Message Drafts|$D54 |02|16³|CR|02À|02|$D77ÄÙ|CR|CR |02##  Date         Base                      Subject|CR |02ÄÄ  ÄÄÄÄÄÄÄÄÄÄÄ  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+; Message draft item list
+; &1=draft #    &2=date   &3=time   &4=to   &5=subject  &6=base name
+533  |02|$L02|&1  |10|&2  |02|$R25|&6 |10|$R35|&5
+; Message draft prompt  &1 = high draft #
+534 |CR|02Select draft to resume (|101|02-|10|&1|02), (|10D|02)elete, or (|10Q|02)uit: |02
+; Message draft scan prompt
+535 |CR|12You have |10|MF |12saved draft message(s).  View them now? |02
+; Message draft delete prompt  &1=high draft #
+537 |CR|02Delete which draft (|101|02-|10|&1|02), or (|10Q|02)uit: |02
+; Password reset by email sending e-mail
+539 |CR|02Sending password reset E-mail ... |XX
+; Password reset by email sent
+540 |02Success!|CR
+; Password reset by email code prompt
+542 |CR|02Enter code found in the email to reset password|CR:|02
+; Password reset by email Enter new password
+543 |CR|02Enter new password: |XX
+; Password reset by email confirm password
+544 |CR|02Confirm password: |XX
+; Email validation: Sending e-mail &1=email address
+547 |CR|02Sending validation code to |10|&1 |02... |XX
+; Email validation: Sent
+548 |02Sent|CR
+; Email validation: Enter code
+550 |CR|02Enter e-mail validation code: |02
+; Email validation: Success
+551 |CR|02Your e-mail address has been verified!|CR|CR|PA
+; Terminal columns (new user)
+553 |CR|02Enter terminal columns: |XX
+; Terminal columns (edit user)
+554 |CR|02Enter terminal columns: |XX

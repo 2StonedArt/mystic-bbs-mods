@@ -1,0 +1,777 @@
+from mystic_bbs import *
+
+import sys,os
+import datetime
+import struct
+import json
+
+#=============================================================================
+# DO NOT EDIT BELOW!!!
+#=============================================================================
+
+cfg = getcfg()
+appdir = cfg['script']+'xqbbsdb'+os.sep
+datadir=cfg['data']
+sys.path.append(appdir)
+import bbsdbvar
+import bbsdbcom
+import ansiviewer
+
+tempdir = cfg['temp']
+logdir = cfg['logs']
+dbfile = cfg['data']+bbsdbvar.prefix+'.sql'
+user  = getuser(0)
+sysop_level = 255
+#load config file...
+cnf = {}
+if os.path.isfile(cfg['data']+bbsdbvar.prefix+'.cfg'):
+  cnf = bbsdbcom.loadjson2list(cfg['data']+bbsdbvar.prefix+'.cfg')
+else:
+  logerror('Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  writeln('Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  
+theme = {}
+themedir=appdir+'images'+os.sep+cnf['theme']+os.sep
+themefile=themedir+'theme.json'
+
+if os.path.isfile(themefile):
+  theme = bbsdbcom.loadjson2list(themefile)
+
+try:
+  scrollbar = {"enable":True,"hichar":chr(theme['scrollbar_hichar']),"lochar":chr(theme['scrollbar_lochar']),"hiatt":theme['scrollbar_hiat'],"loatt":theme['scrollbar_loat']}
+except:
+  scrollbar = {"enable":True,"hichar":chr(178),"lochar":chr(177),"hiatt":12,"loatt":4}
+  
+KEY_UP       = chr(72)       # Some keyboard code defines returned by input functions
+KEY_DOWN     = chr(80)
+KEY_ESCAPE   = chr(27)
+KEY_ENTER    = chr(13)
+KEY_TAB      = chr(9)
+KEY_LEFT     = chr(75)
+KEY_RIGHT    = chr(77)
+KEY_PGUP    = chr(73)
+KEY_PGDN    = chr(81)
+KEY_END     = chr(79)
+KEY_HOME    = chr(71)
+KEY_CTRLA   = chr(1)
+KEY_CTRLR   = chr(18)
+KEY_CTRLZ   = chr(26)
+
+colors = {
+ 'r':"\033[0m",
+  0:"\033[0;30m",
+  1:"\033[0;34m",
+  2:"\033[0;32m",
+  3:"\033[0;36m",
+  4:"\033[0;31m",
+  5:"\033[0;35m",
+  6:"\033[0;33m",
+  7:"\033[0;37m",
+  8:"\033[1;30m",
+  9:"\033[1;34m",
+  10:"\033[1;32m",
+  11:"\033[1;36m",
+  12:"\033[1;31m",
+  13:"\033[1;35m",       
+  14:"\033[1;33m",
+  15:"\033[1;37m",
+  16:"\033[40m",
+  17:"\033[44m",
+  18:"\033[42m",
+  19:"\033[46m",
+  20:"\033[41m",
+  21:"\033[45m",
+  22:"\033[43m",      
+  23:"\033[47m"
+}
+
+def attr2ansi(a):
+    c = a % 16
+    d = a // 16
+    fg = ''
+    bg = ''
+    fg = colors[c]
+    bg = colors[d+16]
+    return fg+bg
+
+def issysop():
+  if user['level'] >= sysop_level:
+    return True
+  else:
+    return False
+
+def cleararea(dim,bg):
+  x1,y1,x2,y2 = dim[0], dim[1], dim[2], dim[3]
+  for i in range(y2-y1):
+    gotoxy(x1,y1+i)
+    write(bg*(x2-x1+1))
+
+def center(a,y,s):
+  writexy(40-len(s) // 2,y,a,s)
+
+def writexy(x,y,a,s):
+  gotoxy(x,y)
+  textcolor(a)
+  write(s)
+
+def drawbg(name,fl=None,main=True):
+  global theme,themedir,themefile
+  write('|07|16|CL')
+  if fl:
+    showfile(themedir+fl,0,False,False,False)
+  else:
+    showfile(themedir+'main.ans',0,False,False,False)
+  if main:
+    writexy(theme['mainlist_title'][0],theme['mainlist_title'][1],theme['mainlist_title'][2],name[:theme['main_list'][2]-theme['main_list'][0]-1])
+  else:
+    writexy(theme['bbstree_title'][0],theme['bbstree_title'][1],theme['bbstree_title'][2],name[:theme['bbs_tree'][2]-theme['bbs_tree'][0]-1])
+
+def loadlist(fl):
+  res = []
+  
+  if not os.path.isfile(appdir+fl):
+    return res
+  
+  with open(appdir+fl,'r') as f:
+    items = f.readlines()
+
+  for i in range(len(items)):
+    if items[i][:1].lstrip()=='#' or items[i][:1].lstrip()=='':
+      continue
+    else:
+      fields = items[i].split(';')
+      if user['level']>=int(fields[2]):
+        if len(fields) == 3:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2]})
+        elif len(fields) == 4:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'sql':replacevars(fields[3].strip('\n')), 'desc':''})
+        elif len(fields) == 5:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'sql':replacevars(fields[3]), 'desc':fields[4].strip('\n')})
+        elif len(fields) == 6:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'sql':replacevars(fields[3]), 'desc':fields[4],'image':fields[5].strip('\n')})
+  return res
+
+def replacevars(s):
+  f = str(s).replace('{script}',getcfg()['script'])
+  f = f.replace('{system}',getcfg()['system'])
+  f = f.replace('{text}',getcfg()['text'])
+  f = f.replace('{theme}',getcfg()['theme'])
+  f = f.replace('{deftheme}',getcfg()['deftheme'])
+  return f
+  
+def selecttheme():
+  global theme,themedir,themefile,scrollbar
+  boxs=''
+  keys=''
+  thms = os.listdir(appdir+'images')
+  for i,a in enumerate(thms):
+    boxs += str(i)+'-'+a+','
+    keys += str(i)
+  write('|#V#1#26#'+str(10)+'# Select Theme #'+boxs+'Q-Quit#')
+  ch = onekey(chr(13) + keys+'Q', False)
+  ch = ch.upper()
+  if not ch == 'Q':
+    themedir=appdir+'images'+os.sep+thms[int(ch)]+os.sep
+    themefile=themedir+'theme.json'
+    theme = bbsdbcom.loadjson2list(themefile)
+    try:
+      scrollbar = {"enable":True,"hichar":chr(theme['scrollbar_hichar']),"lochar":chr(theme['scrollbar_lochar']),"hiatt":theme['scrollbar_hiat'],"loatt":theme['scrollbar_loat']}
+    except:
+      scrollbar = {"enable":True,"hichar":chr(178),"lochar":chr(177),"hiatt":12,"loatt":4}
+
+def treelist(items,x1,y1,x2,y2,hc=15,nc=7,sel=1,sb=scrollbar):
+    global exit_keys
+    global exit_code
+    global cnf
+    global theme,themedir,themefile,scrollbar
+    
+    search_txt = ''
+    search_x, search_y, search_cl, search_width = theme['main_search'][0],theme['main_search'][1],theme['main_search'][2],theme['main_search_width']
+    search_index = 0
+    
+    def updatebar():
+        if sb["enable"] == False: Return
+        for i in range(0,y2-y1+1):
+            writexy(x2,y1+i,sb["loatt"],sb["lochar"])
+        if len(items) < 2:
+            y = 0
+        else:
+            y = (selbar * (y2-y1)) // (len(items)-1)
+        writexy(x2,y1+y,sb["hiatt"],sb["hichar"])
+    
+    if len(items)<1:
+      return -1
+    exit_code = ""
+    key = ""
+    value = -1
+    done = False
+    if sel <= len(items):
+        top = sel-(y2-y1)
+        if top < 1: top = 0
+    else:
+        top = 0
+    if sel <= len(items):
+        selbar = sel
+    else:
+        selbar = 0
+    if items[selbar]['type'] == 'vbase':
+        selbar +=1
+    
+    drawbg('     DATABASE')
+    while done == False and not shutdown():
+        #writexy(1,1,7,str(top)+"/"+str(selbar)+"/"+str(len(items)))
+        gotoxy(x1,y1)
+        y = top
+        while y1+y-top<=y2:
+            if y<len(items):
+                if items[y]['type'] == 'group':
+                    writexy(x1,y1+y-top,theme['group_cl'],items[y]['name'].ljust(x2-x1, chr(theme['group_fill_ch']))[:x2-x1])
+                elif items[y]['type'] == 'mbase':
+                    writexy(x1,y1+y-top,theme['mbase_cl'],items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+                elif items[y]['type'] == 'vbase':
+                    writexy(x1,y1+y-top,theme['vbase_cl'],items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+            else:
+                writexy(x1,y1+y-top,nc," ".ljust(x2-x1, " ")[:x2-x1])
+            y += 1
+        if items[selbar]['type'] == 'vbase':
+            writexy(x1,y1+selbar-top,theme['vbase_clsel'],items[selbar]['name'].ljust(x2-x1, " ")[:x2-x1])
+        elif items[selbar]['type'] == 'mbase':
+            writexy(x1,y1+selbar-top,theme['mbase_clsel'],items[selbar]['name'].ljust(x2-x1, " ")[:x2-x1])
+        textcolor(7)
+        if theme['enable_bbs_image']:
+            cleararea(theme['desc_view'],' ')
+
+        ddesc = items[selbar].get('desc')
+        
+        if theme['enable_bbs_image']:
+            if ddesc:
+                gotoxy(27,10)
+                write(ddesc)
+            if items[selbar].get('image'):
+              with open(appdir+'logos'+os.sep+items[selbar]['image'],'r') as fl:
+                lines = fl.read().splitlines()
+              for i,ln in enumerate(lines):
+                writexy(27,4+i,7,ln)       
+        
+        updatebar()
+        gotoxy(1,25)
+        
+        key, extended = getkey()
+        
+        if extended:
+          
+          if key == KEY_UP:
+              selbar=selbar-1
+              if items[selbar]['type'] == 'group':
+                  selbar -=1
+              if selbar < 1:
+                  selbar = 1
+                  top = 0
+                  if items[selbar]['type'] == 'group':
+                    selbar +=1
+              if selbar < top:
+                  top = selbar
+                  if items[selbar]['type'] == 'group':
+                    selbar -=1
+          elif key == KEY_PGUP:
+              selbar = selbar - (y2-y1)
+              if selbar < 0:
+                  selbar = 0
+                  top = 0
+                  if items[selbar]['type'] == 'group':
+                      selbar +=1
+              else:
+                  top = top - (y2-y1)
+                  if top < 0:
+                      top = 0
+          elif key == KEY_PGDN:
+              selbar = selbar+(y2-y1)
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              top = top+(y2-y1)
+              if top > len(items)-1-(y2-y1):
+                  top = len(items)-1-(y2-y1)
+                  if top < 0:
+                      top = 0
+              if items[selbar]['type'] == 'group' and selbar < len(items):
+                  selbar +=1
+          elif key == KEY_END:
+              selbar=len(items)-1
+              if len(items)-(y2-y1)-1 > 0:
+                  top = len(items)-(y2-y1)-1
+              else:
+                  top = 0
+              if items[selbar]['type'] == 'group':
+                  selbar -=1
+          elif key == KEY_HOME:
+              selbar=0
+              top = 0
+              if items[selbar]['type'] == 'group':
+                    selbar +=1
+          elif key == KEY_DOWN: 
+              selbar+=1
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+                  if items[selbar]['type'] == 'group':
+                      selbar -= 1
+              else:
+                  if items[selbar]['type'] == 'group':
+                      selbar +=1
+                      if selbar-top > y2-y1:
+                          top += 1
+              if selbar-top > y2-y1:
+                  top += 1
+        else:
+          key = key.upper()
+          if key == KEY_ENTER:
+              value = selbar
+              if items[selbar]['type'] == 'mbase': #(name,sql,x1,y1,x2,y2,hc=15,nc=7,sel=0,sb=scrollbar):
+                  bbstree(items[selbar]['name'],items[selbar]['sql'],theme['bbs_tree'][0],theme['bbs_tree'][1],theme['bbs_tree'][2],theme['bbs_tree'][3],theme['mbase_clsel'],theme['mbase_cl'],0,scrollbar)
+                  sb=scrollbar
+              x1,y1,x2,y2 = theme['main_list'][0],theme['main_list'][1],theme['main_list'][2],theme['main_list'][3]
+              search_x, search_y, search_cl, search_width = theme['main_search'][0],theme['main_search'][1],theme['main_search'][2],theme['main_search_width']
+              drawbg('     DATABASE')
+          elif key == 'T':
+              selecttheme()
+              sb=scrollbar
+              x1,y1,x2,y2 = theme['main_list'][0],theme['main_list'][1],theme['main_list'][2],theme['main_list'][3]
+              search_x, search_y, search_cl,search_width = theme['main_search'][0],theme['main_search'][1],theme['main_search'][2],theme['main_search_width']
+              drawbg(' Sort By...','bbstree.ans',False)
+          elif key == KEY_ESCAPE:
+              done = True
+          elif key == 'A':
+              if search_text:
+                  writexy(search_x,search_y,search_cl,search_text.ljust(theme['main_search_width'],' ').upper())
+                  search_text = search_text.upper()
+                  ind = search_index+1
+                  while ind<len(items) and not shutdown():
+                      if search_text in items[ind]['name'].upper():
+                          selbar = ind
+                          top  = ind
+                          search_index = ind
+                          break
+                      ind += 1
+          elif key == 'Y':
+              search_text = ''
+              search_index = 1
+              writexy(search_x,search_y,search_cl,' '*(theme['main_search_width']))
+          elif key == 'Q':
+              gotoxy(search_x,search_y)
+              textcolor(search_cl)
+              search_text = getstr(1,13,13,'')
+              if search_text:
+                  search_index = 1
+                  writexy(search_x,search_y,search_cl,search_text.ljust(theme['main_search_width'],' ').upper())
+                  search_text = search_text.upper()
+                  ind = search_index
+                  while ind<len(items) and not shutdown():
+                      if search_text in items[ind]['name'].upper():
+                          selbar = ind
+                          top  = ind
+                          search_index = ind
+                          break
+                      ind += 1
+                
+          elif key == 'C' and issysop():
+              menucmd('GY',appdir+'bbsdbcfg')
+              drawbg(' Sort By...','bbstree.ans',False)
+          elif key == 'P' and issysop():
+              menucmd('GY',appdir+'bbsdblog')
+              drawbg(' Sort By...','bbstree.ans',False)
+          elif key == 'S' and issysop():
+              menucmd('GY',appdir+'bbsdbsql')
+              bbsdbcom.pause(True)
+              drawbg(' Sort By...','bbstree.ans',False)
+          elif key == 'H':    
+              write('|07|16|CL')
+              showfile(themedir+'bbshelp.ans',0,False,False,False)
+              if issysop():
+                  writexy(4,17,4,'Sysop Commands Only...')
+                  writexy(4,18,4,'C :: for Config Editor')
+                  writexy(4,19,4,'S :: for Message Scrape Tool')
+                  writexy(4,20,4,'P :: for Sending a Ping Post')
+              getkey()
+              drawbg(' Sort By...','bbstree.ans',False)
+    return value
+
+def bbstree(name,sql,x1,y1,x2,y2,hc=15,nc=7,sel=0,sb=scrollbar):
+    global exit_keys
+    global exit_code
+    global dbfile
+    global theme,themedir,themefile,scrollbar
+    redraw = True
+    
+    search_text = ''
+    search_x, search_y, search_cl,search_width = theme['bbs_search'][0],theme['bbs_search'][1],theme['bbs_search'][2],theme['bbs_search_width']
+    search_index = 0
+    
+    def updatebar():
+        if sb["enable"] == False: Return
+        for i in range(0,y2-y1+1):
+            writexy(x2,y1+i,sb["loatt"],sb["lochar"])
+        if len(items) < 2:
+            y = 0
+        else:
+            y = (selbar * (y2-y1)) // (len(items)-1)
+        writexy(x2,y1+y,sb["hiatt"],sb["hichar"])
+    
+    if not os.path.isfile(dbfile):
+      bbsdbcom.msgdialog(' Error ','No items to display.')
+      return -1
+    
+    conn = bbsdbcom.sqlconnect(dbfile)
+    cursor = conn.cursor()
+    
+    execute=0
+    if '[ASK]' in sql:
+      sql = sql.replace('[ASK]','')
+      bbsdbcom.msgdialog(' ATTENTION! ',' '*40,False)
+      gotoxy(20,12)
+      if getyn("Really execute SQL statement? ", False):
+        execute=2
+    else:
+      execute=1
+    
+    try:
+      if execute>0:
+        cursor.execute(sql)
+        if execute==2: cursor.commit()
+    except:
+      bbsdbcom.msgdialog(' Error ','No items to display.')
+      conn.close()
+      return -1
+      
+    
+    items = cursor.fetchall()
+    
+#    print(items)
+#    bbsdbcom.pause()
+    
+    if len(items)<1:
+        bbsdbcom.msgdialog(' Error ','No items to display.')
+        return -1
+        
+    exit_code = ""
+    key = ""
+    value = -1
+    done = False
+    if sel <= len(items):
+        top = sel-(y2-y1)
+        if top < 1: top = 0
+    else:
+        top = 0
+    if sel <= len(items):
+        selbar = sel
+    else:
+        selbar = 0
+    
+    drawbg(' '+name,'bbstree.ans',False)
+    width = theme['detail_view'][2]-theme['detail_view'][0]
+    cleararea(theme['detail_view'],' ')
+    while done == False and not shutdown():
+        gotoxy(x1,y1)
+        y = top
+        while y1+y-top<=y2:
+            if y<len(items):
+                writexy(x1,y1+y-top,nc,items[y][1].ljust(x2-x1, " ")[:x2-x1])
+            else:
+                writexy(x1,y1+y-top,nc," ".ljust(x2-x1, " ")[:x2-x1])
+            y += 1
+        
+        writexy(x1,y1+selbar-top,hc,items[selbar][1].ljust(x2-x1, " ")[:x2-x1])
+        #writexy(28,3,15,items[selbar][1].ljust(50,' ')[:50])
+        # writexy(34,4,15,str(formatsize(items[selbar]['size'])).ljust(10,' '))
+        # writexy(34,5,15,datestr(dated2u(items[selbar]["date"]), "NNN DD YYYY HH:II:SS").ljust(30,' '))
+        # writexy(38,6,15,items[selbar]['user'].ljust(17,' '))
+        # writexy(67,6,15,str(items[selbar]['dl']).ljust(5,' '))
+        #cleararea(cnf['view_x1'],cnf['view_y1'],cnf['view_x2'],cnf['view_y2'],' ')
+
+#(1, u'Another Droid BBS', u'andr01d.zapto.org', u'Raspberry Pi', 333, u'11111011111111111111111111111111;',
+# 11, 0, 9326, u'15:15:18', 2225, u'xqtr', 2, u'null;[LOC] BBS;[LOC] Hacking;[LOC] HAM Radio;[LOC] Prepping/Survival;[NET] FsxNet;[NET] DoreNet;[NET] SciNet;[LOC] Torrentz;[LOC] Roms;[NET] Zer0Net;', 
+# u'', u'2023-10-01', 5, u'Mystic 1.12 A47', u'Raspberry Pi', u'Another Droid [English];fsxNet;DoreNet;AgoraNet;ZeroNet;SciNet;', u'fsxnet;zeronet;scinet;')]
+        if redraw:
+          tempfile = cfg['temp']+'tmp.ans'
+          with open(tempfile,'w') as fl:
+            fl.write('\n')
+            fl.write(attr2ansi(theme['ansi_lastseen'])+'Last Seen on NetWork\n')
+            fl.write(attr2ansi(theme['ansi_div'])+items[selbar][15].rjust(width)+'\n')
+            title = 'Name '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][1].rjust(width)+'\n')
+            title = 'Address '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][2].rjust(width)+'\n')
+            title = 'Webpage '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][23].rjust(width)+'\n')
+            title = 'DialUp '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][22].rjust(width)+'\n')
+            title = 'Location '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][14].rjust(width)+'\n')
+            title = 'Sysop '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][11].rjust(width)+'\n')
+            title = 'Login '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][24].rjust(width)+'\n')
+            title = 'Email '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][21].rjust(width)+'\n')
+            title = 'Software '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][17].rjust(width)+'\n')
+            title = 'Operating System '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+'\n')
+            fl.write(attr2ansi(theme['ansi_desc'])+items[selbar][18].rjust(width)+'\n')
+            title = 'Nodes '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][16]).rjust(width)+'\n')
+            title = 'Total Themes '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][12]).rjust(width)+'\n')
+            title = 'Total Users '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][4]).rjust(width)+'\n')
+            title = 'Total calls '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][8]).rjust(width)+'\n')
+            title = 'Total Days Online '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][10]).rjust(width)+'\n')
+            title = 'Calls Last 7 Days '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][6]).rjust(width)+'\n')
+            title = 'Users Last 7 Days '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            fl.write(str(items[selbar][7]).rjust(width)+'\n')
+            title = 'Echonets '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            en = items[selbar][20].split(';')
+            if en:
+              for e in en:
+                fl.write(e.rjust(width)+'\n')
+            else:
+              fl.write('Not Available'.rjust(width)+'\n')
+            title = 'Message Bases '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            en = items[selbar][19].split(';')
+            if en:
+              for e in en:
+                fl.write(e.rjust(width)+'\n')
+            else:
+              fl.write('Not Available'.rjust(width)+'\n')
+            title = 'File Bases '
+            fl.write(attr2ansi(theme['ansi_title'])+title+attr2ansi(theme['ansi_div'])+chr(196)*(width-len(title))+chr(191)+attr2ansi(theme['ansi_desc'])+'\n')
+            en = items[selbar][13].split(';')
+            if en:
+              for e in en:
+                fl.write(e.rjust(width)+'\n')
+            else:
+              fl.write('Not Available'.rjust(width)+'\n')
+            
+            for i in range(5): fl.write('\n')
+              
+          av = ansiviewer.ansiviewer(tempfile)
+          av.x1 = theme['detail_view'][0]
+          av.x2 = theme['detail_view'][2]
+          av.y1 = theme['detail_view'][1]
+          av.y2 = theme['detail_view'][3]-1
+          av.drawansi()
+        
+              
+        updatebar()
+        gotoxy(1,25)
+        
+        key, extended = getkey()
+        
+        if extended:
+        
+          if key == KEY_UP:
+              dizi = 0
+              selbar=selbar-1
+              if selbar < 1:
+                  selbar = 0
+              if selbar < top:
+                  top = selbar
+              redraw=True
+          elif key == KEY_PGUP:
+              dizi = 0
+              selbar = selbar - (y2-y1)
+              if selbar < 0:
+                  selbar = 0
+                  top = 0
+              else:
+                  top = top - (y2-y1)
+                  if top < 0:
+                      top = 0
+              redraw=True
+          elif key == KEY_PGDN:
+              dizi = 0
+              selbar = selbar+(y2-y1)
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              top = top+(y2-y1)
+              if top > len(items)-1-(y2-y1):
+                  top = len(items)-1-(y2-y1)
+                  if top < 0:
+                      top = 0
+              redraw=True
+          elif key == KEY_END:
+              dizi = 0
+              selbar=len(items)-1
+              if len(items)-(y2-y1)-1 > 0:
+                  top = len(items)-(y2-y1)-1
+              else:
+                  top = 0
+              redraw=True
+          elif key == KEY_HOME:
+              dizi = 0
+              selbar=0
+              top = 0
+              redraw=True
+          elif key == KEY_DOWN: 
+              dizi = 0
+              selbar=selbar+1
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              if selbar > top+y2-y1:
+                  top += 1
+              redraw=True
+          elif key == KEY_LEFT:
+              av.moveup()
+              av.drawansi()
+              redraw=False
+          elif key == KEY_RIGHT:
+              av.movedown()
+              av.drawansi()
+              redraw=False
+        else:
+          key = key.upper()
+          if key == KEY_ESCAPE:
+              done = True
+          elif key == KEY_ENTER:
+              ypos = y1+selbar-top
+              if ypos + 7 > 24: ypos = 17
+              write('|#V#1#26#'+str(ypos)+'# Options #T-Telnet,A-Download BBS info :: ANSI,J-Download BBS info :: JSON,Q-Quit#')
+              ch = onekey(chr(13) + 'TAJQ', False)
+              ch = ch.upper()
+              if ch == 'T':
+                bbsdbcom.msgdialog(' ATTENTION! ',' '*40,False)
+                gotoxy(20,12)
+                if getyn("Telnet to the BBS? ", False):
+                  bbsdbcom.clrscr()
+                  bbsdbcom.connect_bbs(items[selbar][2])
+              elif ch == 'J':
+                bbsdbcom.clrscr()
+                gotoxy(1,2)
+                writeln('  |15BBS Database ')
+                writeln('  |04------------')
+                writeln('')
+                writeln('  |04Downloading info for BBS :: JSON Format')
+                writeln('  |08+  |14'+items[selbar][2])
+                writeln('|07|16')
+                writeln(' ')
+                writeln(' ')
+                bbsdbcom.getbbsinfo(items[selbar][2])
+              elif ch == 'A':
+                bbsdbcom.clrscr()
+                gotoxy(1,2)
+                writeln('  |15BBS Database ')
+                writeln('  |04------------')
+                writeln('')
+                writeln('  |04Downloading info for BBS :: ANSI Format')
+                writeln('  |08+  |14'+items[selbar][2])
+                writeln('|07|16')
+                writeln(' ')
+                writeln(' ')
+                menucmd('F3',cfg['temp']+'tmp.ans')
+              drawbg(' '+name,'bbstree.ans',False)
+          elif key == '[':
+              av.movepgup()
+              av.drawansi()
+              redraw=False
+          elif key == ']':
+              av.movepgdn()
+              av.drawansi()
+              redraw=False
+          elif key == 'T':
+              selecttheme()
+              sb=scrollbar
+              x1,y1,x2,y2 = theme['bbs_tree'][0],theme['bbs_tree'][1],theme['bbs_tree'][2],theme['bbs_tree'][3]
+              search_x, search_y, search_cl,search_width = theme['bbs_search'][0],theme['bbs_search'][1],theme['bbs_search'][2],theme['bbs_search_width']
+              hc,nc = theme['mbase_clsel'],theme['mbase_cl']
+              drawbg(' '+name,'bbstree.ans',False)
+          elif key == 'A':
+              if search_text:
+                  writexy(search_x,search_y,search_cl,search_text.ljust(theme['bbs_search_width'],' ').upper())
+                  search_text = search_text.upper()
+                  ind = search_index+1
+                  while ind<len(items) and not shutdown():
+                      if search_text in items[ind][1].upper():
+                          selbar = ind
+                          top  = ind
+                          search_index = ind
+                          break
+                      ind += 1
+          elif key == 'Y':
+              search_text = ''
+              search_index = 1
+              writexy(search_x,search_y,search_cl,' '*(theme['bbs_search_width']))
+          elif key == 'Q':
+              gotoxy(search_x,search_y)
+              textcolor(search_cl)
+              search_text = getstr(1,13,13,'')
+              if search_text:
+                  search_index = 1
+                  writexy(search_x,search_y,search_cl,search_text.ljust(theme['bbs_search_width'],' ').upper())
+                  search_text = search_text.upper()
+                  ind = search_index
+                  while ind<len(items) and not shutdown():
+                      if search_text in items[ind][1].upper():
+                          selbar = ind
+                          top  = ind
+                          search_index = ind
+                          break
+                      ind += 1
+          elif key == 'D':
+              write('|#V#1#26#'+str(10)+'# Download List #C-CSV Format,T-SyncTerm INI Format,M-MagiTerm INI Format,S-Short (Name|Address),F-Full ,Q-Quit#')
+              ch = onekey(chr(13) + 'CFTMSQ', False)
+              ch = ch.upper()
+              bbsdbcom.clrscr()
+              gotoxy(1,2)
+              writeln('  |15BBS Database ')
+              writeln('  |04------------')
+              writeln('')
+              writeln('  |04Downloading Database:')
+              writeln('|07|16')
+              writeln(' ')
+              writeln(' ')
+              if ch == 'C':
+                bbsdbcom.exportdb2csv(sql)
+              elif ch == 'M':
+                bbsdbcom.exportdb2magi(sql)
+              elif ch == 'S':
+                bbsdbcom.exportdbshort(sql)
+              elif ch == 'T':
+                bbsdbcom.exportdb2sync(sql)
+              elif ch == 'F':
+                bbsdbcom.exportdbfull(sql)
+              drawbg(' '+name,'bbstree.ans',False)
+            
+          elif key == 'H':
+              write('|07|16|CL')
+              showfile(themedir+'bbshelp.ans',0,False,False,False)
+              getkey()
+              drawbg(' '+name,'bbstree.ans',False)
+              
+
+    
+    conn.close()
+    return value    
+  
+#drawbg('DATABASE')
+treelist(loadlist('list.csv'),theme['main_list'][0],theme['main_list'][1],theme['main_list'][2],theme['main_list'][3])
+gotoxy(1,24)
+write('|07|16|CL')

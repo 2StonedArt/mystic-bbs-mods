@@ -1,0 +1,28 @@
+Mystic BBS DOOR WIKI for Linux
+
+By Last Sysop MMXVIII
+
+Before install read INSTALL
+
+--=== Door help ===--
+
+This is very first stage of development
+Query from door program using:
+
+wiki <keyword>
+
+In case the sentence is supposed to be longer use:
+
+wiki <keywords>
+
+When the search is sucessfull the ansi program will
+be called to display file in specified path.
+
+At the ANSI viewer use <SPACE> to scroll a page and 
+arrorws to eventually move up / down. Use <q> to quit
+the viewer.
+
+When on command line use "q" to quite to BBS.
+Or wiki to search for a term.
+
+

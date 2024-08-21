@@ -1,0 +1,26 @@
+; &1=Login attempt &2=Allowed attempts &3=Remaining attempts
+000 |CL|DFprelogin||PA|DFlogin||[X29|[Y17|XX
+; Log in as new user prompt
+001 |DFcmd.ans||[A03|[C09|16|12Create an account with this BBS? |11
+; Standard user login: User's password
+002 |CR|[X29|[Y18|17|09|XX
+; Standard user login: Invalid PW
+003 |[X30|[Y16|16|12Invalid password...
+; Displayed IMMEDATELY when a user connects if the password is set
+004 |CR|DFcmd.ans||[A03|[C09System Password: |XX
+; System pause prompt
+022 |CR|[C22|15|17  Press |09[|14ENTER|09|17]|15 to continue...  
+; User list header
+029 |CL|DFhdrblue.ans||[X03|[Y02|17|15User Listing|16|CR|CR    |10U|02ser |10N|02ame|07|$D19 |10L|02ocation|07                   |10S|02ex/|10A|02ge    |10L|02ast|10O|02n|CR    |09|$D73Ä
+; File listing header
+041 |CL||DFhdrblue.ans||[X03|[Y02|17|15File Listing|16|CR|CR
+100 |CL|DFhdrblue.ans||[X03|[Y02|17|15Message Base Listing|$L53|MG |01|16|CR|CR |10A|02rea  |10M|02essage |10B|02ase |10N|02ame                |10A|02rea  |10M|02essage |10B|02ase |10N|02ame|CR |09|$D77Ä
+; Who's online list header
+138 |CL|DFhdrblue.ans||[X03|[Y02|15|17Who's Online|16|CR|CR  |10N|02ode  |10U|02ser                       |10A|02ction|CR|09 |$D77Ä
+; Last callers list header &1 = Number of callers in list
+141 |CL|DFhdrblue.ans||[X03|[Y02|17|15Last |&1 Callers |$D45 |$L06|TC total |01|16|CR|CR |10U|02ser|$D24 |10L|02ocation|$D19 |10N|02ode    |10D|02ate    |10T|02ime|CR |09|$D77Ä
+; One Liner header
+188 |CL|DFhdrblue.ans||[X03|[Y02|17|15One Liners |09from hub visitors. Contribute and add your line! |CR|CR|01|16
+; One liner prompt
+189 |DFcmd.ans||[A03|[C09|17|16Add a line to the board? |11
+190 |DFcmd2.ans||[A04|[C09Enter your one liner:|CR|[C02|01|16

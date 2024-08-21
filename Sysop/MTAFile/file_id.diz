@@ -1,0 +1,26 @@
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=         
+            Mys Tic File Announce
+                Ver 2.0.0.0
+             Linux/64 Version
+                27 Apr 2019   
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=			   
+
+Simple program to generate new file reports
+  based on the incoming TIC files. Simply
+copy TIC files into a seperate announcement
+  directory, and let mtafile do its work
+
+Version 2.0.0.0 has been officially released
+   as Open Source under GNU license 3.0. 
+
+ Source code is included here, or the latest
+      version is can be obtained from:
+    https://github.com/DRPanther/MTAFile
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+             RCS CRBBS(2017-19)
+			  
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+

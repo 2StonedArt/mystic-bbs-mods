@@ -1,0 +1,83 @@
+                            -=-= Change Log =-=-
+							
+1.00a -=>  First pre-release
+1.00b -=>  Output modifications
+1.00c -=>  Changed code to not create empty .RPT file if no TICs are present
+1.00d -=>  Fixed bug created in 1.0c of not placing report file in correct 
+		   directory
+1.00e -=>  Adjusted output to utilize more of the screen. Added code to ensure
+		   report file would end up in correct directory
+1.00f -=>  Fixed many bugs - main bug was not deleting the old report before 
+		   creating new one.
+1.01a -=>  Cleaned up code - Made sure it was ready for public release
+1.01b -=>  Major Bug fix - Program could go into infinate loop 
+           Corrected typos in this text file
+1.01c -=>  Bug fix (damn typos)... :)
+1.01d -=>  Minor bug fixes - Added date/time of report generation
+1.01e -=>  Optimized code
+1.01f -=>  Fixed small bugs of not pulling origin or area desctiption fields
+1.01g -=>  Added help for when program is run without command line parameters
+           or if run with 'mtafile ?' - Implemented accomodation for incorrect
+           formatting of TIC files. MTAFile will now read multiple 'Desc'
+           lines in the TIC file. 
+1.2.0.2 -=>Major changes! Changed version numbering to match versioning in
+           Lazarus. Now uses array of records to hold information from TIC
+           files. This allows some manipulation when outputing to text file.
+           Files are now grouped by file echo name. Duplicate file listings
+           are no longer outputted into the report. Turned off debug mode in
+           Lazarus, so executable file size will be much smaller. Added more
+           checks in the duplicate file protection. Program will now be able
+           to check better, which files belong in which echo listing.
+1.5.0.4 -=>Another Major change! Complete re-write of the code. This not only
+           made it easier to read, but also to debug. Was able to add sorting
+           of both the areas in the output file, while also the filenames
+           within the areas. (mark that off the ToDo list) :) Added additional
+           logging to help with debugging. If the logs start getting too large
+           I will cut some of it back. Changed to work with .TIC information
+           in memory, instead of utilizing a temp file. Added comments to code
+           so I don't forget what the procedures are designed to do... :) 
+1.5.1.1 -=>Cleaned up code, a lot! This was the first program I started
+           writing in Pascal, and it was a mess. 700+ lines of code, in a
+           total of 3 procedures... 
+1.5.1.7 -=>Corrected a couple of errors. One of them being the version 
+           mismatch, the other was the incorrect operating system being 
+           displayed in the Windows version. This is now read from the systems
+           operating system, instead of being hard-coded into the program.
+           The program is also now determining if the system is running 32 or
+           64 bit. Help, using the ? as a command line parameter, will now
+           display only the information for your operating system.
+1.5.4.1 -=>More major changes! Added a config file to store most of the options
+           the program. Added the ability to set where you would like the log
+           file to be located. MTAFile has been creating a data file which
+           contains information about each run of the program. Now, this info
+           is being used to create a report which shows the incoming stats
+           for the last x number of runs. Added error checking to make sure 
+           there are .tic files in the given directory. If there aren't, the 
+           program will give an error message and exit.
+1.5.4.3 -=>Major bug fix in the Linux version. Windows seems to be unaffected
+1.5.6.1 -=>Changed to an generic config file that will be used for multiple
+           programs. Fixed a bug where the program was displaying multiple
+           'Area' insertions into the output file, when not needed. Also 
+           increased the number of .tic files that can be processed on each
+           run of the program. Per request, added a screen output which states
+           the program has completed and exited normally.(Thanks dream master)
+1.5.6.3 -=>Finally able to compile a 32bit version for Linux! :) The config
+           file name has changed to rcs.ini. There are many additions made to 
+           the config file, as it will now be used by multiple programs. 
+1.6.4.2 -=>Cleaned up and optimized some code. Changed formating of numbers to
+           show 5 Mb, instead of 5,398,205 bytes. Made a few cosmetic changes
+           to the output file for better readability.
+1.7.1.1 -=>Added some comments to the code, so I can figure out what the heck I
+           was doing at the time of writing it. :) Decided the program was
+           running smoothly on this end, and should release the newest version
+1.7.2.1 -=>Decided it was time to open this project up to the world. From this 
+           version on, it will be open source, and I'll try to keep this up to
+	       date on github as well. You are free to modify this code in any way
+    	   you would like. The only thing I ask, is that if changes are made, 
+	       please send me a copy to see what was changed. Just call it my 
+    	   curiosity getting the better of me. :)
+2.0.0.0 -=>I've bumped the version to 2.0.0.0, so that it's easier to see when
+           the change to open source was done. I've also added a few more notes
+           to the code. I hope everything is commented enough to let you know 
+           what I was doing. The current version of the code can be found at:
+           https://github.com/DRPanther/MTAFile

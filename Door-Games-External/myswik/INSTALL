@@ -1,0 +1,11 @@
+Mystic BBS Door
+
+Query the Wikipedia from Mystic BBS
+
+Install:
+
+1) modify bbs_path in wiki.py 
+2) compile ansi.c using Makefile
+3) cp ansi to Your PATH (used to run Mystic BBS)
+4) configure doors according to file myswiki_config.gif
+

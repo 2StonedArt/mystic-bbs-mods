@@ -1,0 +1,47 @@
+# each line is an entry menu. the menu supports three types of items.
+
+# group: it's just a header to categorize the menu
+#       for groups you have to enter three fields like this:
+#       name;group;acs;
+# mbase: is a normal mystic base
+# vbase: is a virtual base.
+
+#name;mbase;acs;id[;description]
+#name;vbase;acs;file[;description]
+
+
+ALL BBSes ;group;20;-1
+Alphabetical (ASC);mbase;20;select * from bbs order by name asc;|[Y16|12     Show BBSes in Alphabetical order ASCENDING;bbs.ans
+Alphabetical (DES);mbase;20;select * from bbs order by name desc;|[Y16|12     Show BBSes in Alphabetical order DESCENDING;bbs.ans
+Node num (ASC);mbase;20;select * from bbs order by nodes asc;|[Y16|12       Show BBSes with most nodes available        ;bbs.ans
+Node num (DES);mbase;20;select * from bbs order by nodes desc;|[Y16|12       Show BBSes with less nodes available         ;bbs.ans
+Most recent...;mbase;20;select * from bbs order by date desc;|[Y16|12           Most recently updated BBSes;bbs.ans
+Most Users...;mbase;20;select * from bbs order by users desc;|[Y16|12        BBSes with the most registered Users;bbs.ans
+Most Calls;mbase;20;select * from bbs order by totalcalls desc;|[Y16|12             BBSes with the most calls;bbs.ans
+With WebPages;mbase;20;select * from bbs where web<>'';|[Y16|12          BBSes that also have a webpage;bbs.ans
+Have DialUp;mbase;20;select * from bbs where dialup<>'';|[Y16|12       BBSes that also have a dialup connection;bbs.ans
+
+ECHONET ;group;20;-1
+fsxnet;mbase;20;select * from bbs where echonets like '%fsx%';|[Y16|[X39|09BBSes that are part of FSXNET;fsx.ans
+zeronet;mbase;20;select * from bbs where echonets like '%zero%';|[Y16|[X37|04BBSes that are part of Zer0NET;zero.ans
+dorenet;mbase;20;select * from bbs where echonets like '%surv%';|[Y16|[X37|13BBSes that are part of DoreNET;dore.ans
+retronet;mbase;20;select * from bbs where echonets like '%retro%';|[Y16|[X37|14BBSes that are part of RetroNET;retro.ans
+
+SOFTWARE ;group;20;-1
+Mystic;mbase;20;select * from bbs where software like '%mystic%';|[Y17|[X37|15Mystic BBS |07is one of the most known|[X37|[Y18BBS software of today...;mystic.ans
+Synchro;mbase;20;select * from bbs where software like '%synchro%';|[Y17|[X37|15SynchroNET BBS |07is one of the most old|[X37|[Y18BBS and well known software.;synchro.ans
+Enigma;mbase;20;select * from bbs where software like '%enigma%';|[Y17|[X37|15Enigma BBS |07is a new breeze of|[X37|[Y18BBS software of today...;enigma.ans
+
+OS ;group;20;-1
+Linux;mbase;20;select * from bbs where os like '%linux%';;linux.ans
+Windows;mbase;20;select * from bbs where os like '%windows%';;win.ans
+Raspberry Pi;mbase;20;select * from bbs where os like '%raspberry%';;rasp.ans
+
+LOCATION ;group;20;-1
+Europe;mbase;20;select * from bbs where location like '%europe%';;europe.ans
+USA;mbase;20;select * from bbs where location like '%usa%';;usa.ans
+Asia;mbase;20;select * from bbs where location like '%asia%';;asia.ans
+
+ADMIN ;group;255;-1
+Clear Database;mbase;255;[ASK]delete from bbs;;bbs.ans
+Drop Table;mbase;255;[ASK]drop table bbs;;bbs.ans

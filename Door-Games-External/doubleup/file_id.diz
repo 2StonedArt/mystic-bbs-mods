@@ -1,0 +1,13 @@
+
+      Double-Up! v1.0 for Mystic BBS 
+ Double-Up! is a Mystic MPL version of the 
+ popular puzzle game, 2048.
+
+ On the 4x4 grid,  slide the numbered tiles
+ left, right, up or down.    When the tiles
+ of the same value collide, they Double-Up!
+ into  one  single tile with the new value.
+
+  Requires Mystic BBS v1.10 A36 or later.
+     A Cyberia BBS production (6/2014)
+           cyberia.darktech.org

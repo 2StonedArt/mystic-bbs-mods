@@ -1,0 +1,50 @@
+#########################################################
+##      FCC AMATEUR RADIO CALLSIGN DATABASE LOOKUP     ##
+##                 a.k.a. "HAM SERACH"                 ##
+##                       v.2 ALPHA                     ##
+##  Copyright (c) 2022, Richard L. Gattie II, KB2MOB   ##
+##           Distributed under the BSD License         ##
+#########################################################
+
+You can try this script out on the Radio Freqs & Geeks BBS!
+SSH    : radiofreqsandgeeksbbs.amigaz.org:2222
+Telnet : radiofreqsandgeeksbbs.amigaz.org:2323
+https://www.telnetbbsguide.com/bbs/radio-freqs-and-geeks/
+
+--------------------------------------------------------------------------------------------
+
+This script is no where near complete and still kind of a hack that works. But improvements
+are planned for it. Some of those improvements are:
+
+ - Better Menu System
+ - Event scripts to automatically download the data files from the FCC website
+ - Better search result data
+ - Better search result formatting
+ - About Info, to be able to see last database update, etc... 
+ - Event logging
+ - Better data management
+ 
+INSTALLTION INSTRUCTIONS:
+
+ - Create a directory in your Mystic BBS /theme/default/scripts directory to 
+   place your files.
+ - Place the hamsearch.mpy, grabdb.py and hshdr.ans in the directory you just created. 
+ - Download the License Record file from the FCC website at the URL 
+   below. Or run the grabdb.py script. 
+ - UnZIP the FCC file and place the AM.dat and EN.dat files in a folder called
+   'data'. If you ran the grabdb script, it made it for you.
+ - Edit the 'dbFolder' entry in the hamsearch.py to point to where the 'data' 
+   folder is.   
+ - Add a menu item for HamSearch. Here is what I use on Radio Freqs & Geeks BBS:
+
+  DISPLAY TEXT : [CQ] HamSerach v.2
+  Hot Key      : CQ
+  Action List  : (GZ) Execute Python 3 Script {insert complete path to the HamSearch folder you created}
+
+You should now be able to access the script from your BBS's menu and do a search for a callsign. 
+
+FCC data file can be downloaded from:
+https://data.fcc.gov/download/pub/uls/complete/l_amat.zip
+ 
+
+

@@ -1,0 +1,18 @@
+This is just for inspiration on how to process
+JAM message bases. This particular example puts
+it in sql database.
+
+Before You proceed and use it consider some people
+doesn't like their messages being shared. Trust me.
+
+JAM Message base is common storage format accross
+BBSses. This one is has been sucesfully run against
+Mystic BBS A38.
+
+Requires Python. It was created on Python 2.7.
+There are no special requirements for import packages.
+
+You are entitled to do anything with this script.
+ON YOUR OWN RISK
+
+MMXVIII Last Sysop

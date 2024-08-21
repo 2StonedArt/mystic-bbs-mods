@@ -1,0 +1,21 @@
+Mystic BBS Door
+
+Holy Bible for Mystic BBS
+
+Install:
+
+1) modify BBS_PATH in bible_wrap.sh
+2) copy bible_wrap into $BBS_PATH/scripts
+3) copy ansiview into $BBS_PATH/scripts 
+4) copy bible.txt into $BBS_PATH/text 
+5) configure mystic door as follows:
+  a) D3 Exec DOOR32 program
+  b) $BBS_PATH/scripts/bible_wrap.sh %U
+     e.g. /u01/bbs/scripts/bible_wrap.sh %U
+6) Use door as follows:
+  [b] - bookmark current position
+  [g] - goto last position
+  [n] - page down
+  [ ] - page down
+  [u] - page up
+

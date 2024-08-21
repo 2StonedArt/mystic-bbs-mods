@@ -1,0 +1,155 @@
+from mystic_bbs import *
+
+import sys,os
+import datetime
+import struct
+import json
+
+#=============================================================================
+# DO NOT EDIT BELOW!!!
+#=============================================================================
+
+cfg = getcfg()
+appdir = cfg['script']+'xqbbsdb'+os.sep
+datadir=cfg['data']
+sys.path.append(appdir)
+import bbsdbvar
+import bbsdbcom  
+
+tempdir = cfg['temp']
+logdir = cfg['logs']
+
+totalcalls = 0
+
+email_subject=bbsdbvar.prefix+"-data"
+email_from=bbsdbvar.prefix
+email_to="All"
+
+#load config file...
+cnf = {}
+if os.path.isfile(cfg['data']+bbsdbvar.prefix+'.cfg'):
+  cnf = bbsdbcom.loadjson2list(cfg['data']+bbsdbvar.prefix+'.cfg')
+else:
+  logerror('Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  writeln('Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  
+def history():                                                                
+  totalcalls = 0
+  weekcalls = 0
+  weekusers = 0
+  f = open(cfg['data']+'history.dat',"rb") # open the file
+  sf = '<IHHHHIIIHHHHHHH26x'
+  size = struct.calcsize(sf)
+  days = os.path.getsize(cfg['data']+'history.dat') // size
+  i = 0                                                                       
+  d = 0                                                                       
+    
+  x = 0
+  while True and not shutdown():
+    line = f.read(size) # read n bytes as the record size                      
+    if len(line) < size:
+        break                                                               
+    Date, Emails, Posts, Downloads, Uploads, DownloadKB, UploadKB, Calls, NewUsers, Telnet, FTP, POP3, SMTP, NNTP, HTTP= struct.unpack(sf,line)
+    x+=1
+     
+    totalcalls += Calls
+    days -= 1
+    if days < 7 and days >=0:
+      weekcalls += Calls
+      weekusers += NewUsers
+  
+  return totalcalls,weekcalls,weekusers
+
+def senddata():
+  global bbs
+  
+  totalcalls,weekcalls,weekusers = history()
+  info = {}
+  info['date'] = bbsdbcom.date2str(datetime.datetime.now())
+  info['time'] = datetime.datetime.now().strftime("%H:%M:%S")
+  info['name'] = mci2str('BN')
+  info['location'] = mci2str('BL')
+  info['address'] = cnf['telnet']
+  info['echonets'] = cnf['echonets']
+  
+  info['email'] = cnf['email']
+  info['dialup'] = cnf['dialup']
+  info['web'] = cnf['web']
+  info['login'] = cnf['login']
+  
+  info['nodes'] = str(cnf['nodes'])
+  info['themes'] = len(os.walk(cfg['theme']).next()[1])
+  info['sysop'] = mci2str('SN')
+  info['software'] = 'Mystic '+mci2str('VR')
+  info['os'] = mci2str('OS')
+  info['totalcalls'] = totalcalls
+  info['weekcalls'] = weekcalls
+  info['weekusers'] = weekusers
+  try:
+    info['days'] = os.path.getsize(cfg['data']+'history.dat') // bbsdbvar.historyrecsize
+  except:
+    info['days'] = 1
+  info['system'] = mci2str('OS') 
+  info['users'] = os.path.getsize(cfg['data']+'users.dat') // bbsdbvar.usersrecsize
+  info['mgroups'] = []
+  if cnf['share_mgroups']:
+    info['mgroups'] = bbsdbcom.getmgroups()
+    
+  info['fgroups'] = []
+  if cnf['share_fgroups']:
+    info['fgroups'] = bbsdbcom.getfgroups()
+  
+  info['mods'] = ''
+  if cnf['share_mods']:
+    info['mods']=bbsdbcom.mods2str()  
+  
+  writeln('|[Y01')
+  js = json.dumps(info, indent=1)
+  
+  tempfile = cfg['temp']+'tmp.txt'
+  f = open(tempfile,'w')
+  f.write('>>> BEGIN\n')
+  for l in js.splitlines():
+    f.write(bbsdbcom.rot47(bbsdbcom.stripmci(l))+'\n')
+  f.write('>>> END\n')
+  f.close()
+
+  crc = bbsdbcom.crc32(tempfile)
+  
+  f = open(tempfile,'a')
+  f.write('\n')
+  for l in bbsdbvar.footer:
+    f.write(l+'\n')
+  f.close()
+  
+  if os.path.isfile(tempfile):
+    for base in cnf['post_base_id']:
+      menucmd('MX',tempfile+';'+str(base)+';bbsdb;All;bbsdb-'+crc)
+    #os.remove(tempfile)
+
+sysoplog(255, 'Sending BBSDB data...')
+
+#try:
+senddata()
+#except Exception as err:
+#  logerror('Crashed while executing BBSDB script. TYPE:'+str(type(err).__name__)+'['+str(err)+']')
+#  write('|12 CRASHED!!!')
+
+
+
+'''
+
+                   /\_________/\______/\______/\_______
+                  \\     /                            //
+                   _\   /   /   /   /    / __/   /   /
+                  /      __/   /   /____/  \      __/jp!
+                //____/    \__    / ___/   /___/    \
+                ==== /______\/   /==\_____// =/______\\==
+                ::::::::::://____\:::::::::::::::::::::::
+                =========================================
+                            Inter-BBS Database
+                -----------------------------------------
+                            Another Droid BBS
+                         andr01d.zapto.org:9999
+                -----------------------------------------
+'''

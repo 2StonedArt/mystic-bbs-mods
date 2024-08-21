@@ -1,0 +1,22 @@
+[?7h[1;1H[40m
+[0;1m[15C[36mÚÄÄÄÄÄÄÄÄÄÄ[0mÄÄÄÄÄÄÄÄ[1;30mÄÄÄÄÄÄÄÄÄÄÄÄÄ[0mÄÄÄÄÄÄÄ[1;36mÄÄÄÄÄÄÄÄ¿
+[15C[46m          [0;30;46mG-Files by Darryl Perry 2013          [40m
+[15C[1;36mÀÄÄÄÄÄÄÄÄÄÄ[0mÄÄÄÄÄÄÄÄ[1;30mÄÄÄÄÄÄÄÄÄÄÄÄÄ[0mÄÄÄÄÄÄÄ[1;36mÄÄÄÄÄÄÄÄÙ
+[15C³   [0;33mUp[7C[1;32m- [36mScroll up[23C³
+[15C³   [0;33mDn[7C[1;32m- [36mScroll down[21C³
+[15C³   [0;33mHome[5C[1;32m- [36mGo to the top of the list[7C³
+[15C[0m³   [33mEnd[6C[1;32m- [36mGo to the bottom of the list    [0m³
+[15C³   [33mEscape   [1;32m- [36mQuit[28C[0m³
+[15C³   [33mENTER    [1;32m- [36mViews the highlited file[8C[0m³
+[15C³[46C³
+[15C[46m                 [30mSysop Commnads                 [40m
+[15C[37m³[46C³
+[15C³   A[8C[1;32m- [36mAdds new articles to the list   [0m³
+[15C³   C[8C[1;32m- [36mCreate new text file[12C[0m³
+[15C³   P[8C[1;32m- [36mPost textfile to message base   [0m³
+[15C³   S[8C[1;32m- [36mSorts the list by filename[6C[0m³
+[15C[1;36m³   [0mD[8C[1;32m- [36mDeletes the highlited entry[5C³
+[15C³   [0mM[8C[1;32m- [36mMoves the entry up or down[6C³
+[15C³   [0mE[8C[1;32m- [36mEdit the selected textfile[6C³
+[15C³   [0mU[8C[1;32m- [36mUpdates the highlited entry[5C³
+[15CÀÄÄÄÄÄÄÄÄÄÄ[0mÄÄÄÄÄÄÄÄ[1;30mÄÄÄÄÄÄÄÄÄÄÄÄÄ[0mÄÄÄÄÄÄÄ[1;36mÄÄÄÄÄÄÄÄÙ[0m

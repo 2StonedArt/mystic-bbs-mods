@@ -1,0 +1,101 @@
+                                __           
+                ___  __________/  |________  
+                \  \/  / ____/\   __\_  __ \ 
+                 >    < <_|  | |  |  |  | \/ 
+                /__/\_ \__   | |__|  |__|    
+                      \/  |__|               
+        ---------------------------------------------
+            Use TheDraw fonts in Mystic BBS
+        ---------------------------------------------
+        Now you can use TheDraw fonts to your BBS,
+        with Mystic BBS and this code. Supports the
+        Color and Block type fonts. 
+        ---------------------------------------------
+                                    .oO0( xqtr )0Oo.
+                                                __           
+                                ___  __________/  |________  
+                                \  \/  / ____/\   __\_  __ \ 
+                                 >    < <_|  | |  |  |  | \/ 
+                                /__/\_ \__   | |__|  |__|    
+                                      \/  |__|               
+         
+         ----------------------------------------------------------------------------
+        
+                              Use TheDraw fonts in Mystic BBS
+                                        First Release
+                                      for mystic 1.12+
+                                        
+        Software --------------------------------------------------------------------
+               [ ] PCB PPe      [ ] OBV          [ ] VGA         [ ] OTHER___________
+               [ ] Renegade     [ ] Iiniquity    [ ] ASCII       [ ] HTML/CGI/WWW    
+               [x] Mystic       [ ] WWVI         [ ] Telegard    [x] MPL
+               [ ] ANSI         [ ] TEXT
+        OS --------------------------------------------------------------------------
+                      [x] dos  [ ] os/2  [x] windows [x] Win32 [x] *nix
+        Type ------------------------------------------------------------------------
+                        infoform [ ]   utility [ ]  misc [x]  door [ ]
+        Disclaimer-------------------------------------------------------------------
+        
+           The author has taken every precaution to insure that no harm or damage
+        will occur on computer systems operating this util.  Never the less, the
+        author will NOT be held liable for whatever may happen on your computer
+        system or to any computer systems which connects to your own as a result of
+        operating this util.  The user assumes full responsibility for the correct
+        operation of this software package, whether harm or damage results from
+        software error, hardware malfunction, or operator error.  NO warranties are
+        offered, expressly stated or implied, including without limitation or
+        restriction any warranties of operation for a particular purpose and/or
+        merchant ability.  If you do not agree with this then do NOT use this
+        program.
+        
+        Description------------------------------------------------------------------
+        
+            Use TheDraw fonts to Mystic BBS scripts.
+        
+        Intallation------------------------------------------------------------------
+        
+        o Unzip the file in Scripts directory of Mystic. The zip contains the script 
+        and two fonts for a demo.
+        
+        o Go to your menu and modify the command to execute the appropriate script
+        
+        For example
+        
+        Type: GX       
+        Data: xq-tdf
+        
+        Configuration--------------------------------------------------------------
+        
+            Nothing needed... just alter the code to your needs.
+        
+        Usage-----------------------------------------------------------------------
+        
+        o Nothing special
+        
+        Bug Fixes/History-----------------------------------------------------------
+        
+        First Release
+        
+        Bug Reports-----------------------------------------------------------------
+        
+        If you want to send me bug report or a note telling me how much you like it,
+        please feel free to do so.
+        
+        Another Droid BBS web page (adbbs.no-ip.org)
+        Email at xqtr.xqtr@gmail.com
+        
+        Disclaimer-------------------------------------------------------------------
+        
+            o The font file format, was found to ROYs website... he has done a great
+            job supporting the ANSI scene... so all credits to him and his awesome
+            website and ANSI creations... 
+            
+        ------------------------------------------------------------------------------
+                                                                       __ 
+                       _   _        _   _                    _        |  |
+         _____ _ _ ___| |_|_|___   | |_| |_ ___      ___ _ _| |___ ___|  |
+        |     | | |_ -|  _| |  _|  | . | . |_ -|    |  _| | | | -_|- _|__|
+        |_|_|_|_  |___|_| |_|___|  |___|___|___|    |_| |___|_|___|___|__|
+              |___|                               
+                                                  
+        ------------------------------------------------------------------------------ 

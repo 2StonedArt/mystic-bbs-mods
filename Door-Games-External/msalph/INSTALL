@@ -1,0 +1,10 @@
+Mystic BBS Door
+
+Seekinng Alpha for Mystic BBS
+
+Install:
+
+1) modify bbs_path in salpha.py 
+2) schedule running of salpha.py for every hour or so
+3) compile salpha.mps and configure Mystic to run from menu
+

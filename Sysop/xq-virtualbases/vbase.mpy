@@ -1,0 +1,1067 @@
+# coding: CP437
+
+"""
+         _____         _   _              ____          _   _ 
+        |  _  |___ ___| |_| |_ ___ ___   |    \ ___ ___|_|_| |        8888
+        |     |   | . |  _|   | -_|  _|  |  |  |  _| . | | . |     8 888888 8
+        |__|__|_|_|___|_| |_|_|___|_|    |____/|_| |___|_|___|     8888888888
+                                                                   8888888888
+                DoNt Be aNoTHeR DrOiD fOR tHe SySteM               88 8888 88
+                                                                   8888888888
+ /: HaM RaDiO   /: ANSi ARt!     /: MySTiC MoDS   /: DooRS         '88||||88'
+ /: NeWS        /: WeATheR       /: FiLEs         /: SPooKNet       ''8888"'
+ /: GaMeS       /: TeXtFiLeS     /: PrEPardNeSS   /: FsxNet            88
+ /: TuTors      /: bOOkS/PdFs    /: SuRVaViLiSM   /:            8 8 88888888888
+                                                              888 8888][][][888
+   TeLNeT : andr01d.zapto.org:9999 / ssh: 8888                  8 888888##88888
+   SySoP  : xqtr                   eMAiL: xqtr@gmx.com          8 8888.####.888
+   DoNaTe : https://paypal.me/xqtr                              8 8888##88##888
+"""
+
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#  
+
+
+from mystic_bbs import *
+import os, sys
+import datetime
+import time
+import smtplib
+
+exit_keys = []
+exit_code = ""
+
+user  = getuser(0)
+
+scrollbar = {"enable":True,"hichar":chr(178),"lochar":chr(176),"hiatt":7,"loatt":8}
+KEY_UP       = chr(72)       # Some keyboard code defines returned by input functions
+KEY_DOWN     = chr(80)
+KEY_ESCAPE   = chr(27)
+KEY_ENTER    = chr(13)
+KEY_TAB      = chr(9)
+KEY_LEFT     = chr(75)
+KEY_RIGHT    = chr(77)
+KEY_PGUP    = chr(73)
+KEY_PGDN    = chr(81)
+KEY_END     = chr(79)
+KEY_HOME    = chr(71)
+KEY_CTRLA   = chr(1)
+KEY_CTRLR   = chr(18)
+KEY_CTRLZ   = chr(26)
+
+upload_area_id = 1
+sysop_level = 255
+
+mbase_cl = 7
+vbase_cl = 15
+group_cl = 14+16
+mbase_clsel = 15+3*16
+vbase_clsel = 15+3*16
+group_fill_ch = chr(205)
+vgroup_cl = 11+16
+vlink_cl = 14
+vfile_cl = 7
+vgroup_fill_ch = chr(205)
+
+dialog_text = 15+7*16
+
+vbasedir = getcfg()['script']+'vbase'+os.sep
+logdir = getcfg()['logs']
+
+box1=('┌','─','┐','│','│','└','─','┘',' ')
+box2=('╔','═','╗','║','║','╚','═','╝',' ')
+box3=('╓','─','╖','║','║','╙','─','╜',' ')
+box4=('╒','═','╕','│','│','╘','═','╛',' ')
+box5=('█','▀','█','█','█','█','▄','█',' ')
+box6=('█','▀','▄','█','█','▀','▄','█',' ')
+box7=(' ',' ',' ',' ',' ',' ',' ',' ',' ')
+box8=('.','-','.','|','|','`','-','\'',' ')
+
+def log(s):
+  global logdir
+  today = datetime.datetime.now().strftime("%Y%m%d")
+  totime = datetime.datetime.now().strftime("%H:%M:%S")
+  logfile = 'vbases_'+today+'.log'
+  with open(logdir+logfile,'ar') as f:
+    f.write(totime+' ['+user['handle']+'] '+s+'\n')
+
+def encode64(filename):
+  if not os.path.isfile(filename):
+    return -1
+  if os.path.getsize(filename) > 100000:
+    msgdialog('Warning...','File size too big to display.')
+    return -2
+  import base64
+  with open(filename,'rb') as fp:
+    b64 = base64.encodestring(fp.read())
+  clrscr()
+  writeln(' ')
+  writeln('BASE 64 Encoding ---- START')
+  writeln(' ')
+  writeln(b64)
+  writeln(' ')
+  writeln('BASE 64 Encoding ---- ENDED')
+  writeln(' ')
+  pause()
+  
+def issysop():
+  if user['level'] >= sysop_level:
+    return True
+  else:
+    return False
+
+def clrscr():
+  write('|07|16|CL')
+
+def center(a,y,s):
+  writexy(40-len(s) // 2,y,a,s)
+
+def pause(visible=False):
+  if not visible:
+    write('|PN')
+  else:
+    write('|PA')
+
+def formatsize(size):
+  if size <= 1000:
+    return str(size)+' Bytes'
+  r = size // 1000
+  if r < 1000:
+    return str(r)+' KB'
+  r = r // 1000
+  if r < 1000:
+    return str(r)+' MB'
+  r = r // 1000
+  if r < 1000:
+    return str(r)+' GB'
+
+def writexy(x,y,a,s):
+  gotoxy(x,y)
+  textcolor(a)
+  write(s)
+  
+def upload():
+  menucmd('FG','1')
+  menucmd('FA',str(upload_area_id))
+  menucmd('FU','')
+  
+def getlink(url,fname):
+  import urllib2
+  res = 0
+  try:
+    xwindow(' Downloading... ',1,5,10,75,14)
+    u = urllib2.urlopen(url)
+    f = open(vbasedir+os.sep+'tmp'+os.sep+fname, 'wb')
+    meta = u.info()
+    file_size = int(meta.getheaders("Content-Length")[0])
+    #msgdialog('Status',"Downloading: %s Bytes: %s" % (fname, file_size),False)
+    file_size_dl = 0
+    block_sz = 8192
+    while True:
+      buffer = u.read(block_sz)
+      if not buffer:
+        break
+
+      file_size_dl += len(buffer)
+      f.write(buffer)
+      status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+      status = status + chr(8)*(len(status)+1)
+      writexy(7,12,7,'Progress: '+status)
+
+    f.close()
+    res = 1
+  except:
+    res = -1
+    msgdialog(' Error ','Could not download file.')
+  return res
+  
+def xwindow(title,typo,x1,y1,x2,y2):
+  write('|#X#'+str(typo)+'#'+str(title)+'#'+str(x1)+'#'+str(y1)+'#'+str(x2)+'#'+str(y2)+'#');
+  
+def msgdialog(title,text,p=True):
+  a = len(text)
+  if a<75:
+    xwindow(title,1,40-(a // 2)-2,10,40+(a // 2)+2,14)
+    writexy(40-(a // 2),12,dialog_text,text)
+  if p: pause()  
+  
+def filelist():
+  menucmd('FF','/allgroups')
+  return
+    
+def button(s):
+  return '|00|23'+chr(221)+s[:1]+chr(222)+'|07|16'+s[1:]
+    
+def editqueue():
+  while True:
+    textcolor(7)
+    write('|CL')
+    gotoxy(1,1)
+    write(getprompt(56))
+    menucmd('QL','')
+    gotoxy(1,24)
+    write('|07Queue: '+button('Relist')+', '+button('Add')+', '+button('Delete')+', '+button('Clear')+', '+button('Quit')+' |08:')
+    ch = onekey('ADCQ',False)
+    ch = ch.upper()
+    if ch == 'A':
+      menucmd('QA','')
+    elif ch == 'D':
+      menucmd('QD','')
+    elif ch == 'C':
+      menucmd('QC','');
+    elif ch == 'Q':
+      break
+    
+def newfiles():
+  write('|#V#1#30#12# Scan #C-Current,G-Group,A-All,Q-Quit#')
+  ch = onekey(chr(13) + 'CGAQ', False)
+  ch = ch.upper()
+  if ch == 'C':
+    menucmd('FN','C')
+  elif ch == 'G':
+    menucmd('FN','G');
+  elif ch == 'A':
+    menucmd('FN','A');    
+
+def cleararea(x1,y1,x2,y2,bg):
+  for i in range(y2-y1):
+    gotoxy(x1,y1+i)
+    write(bg*(x2-x1+1))
+
+def ansibox(x1,y1,x2,y2,box):
+    gotoxy(x1,y1)
+    write(box[0]+box[1]*(x2-x1-1)+box[2])
+    gotoxy(x1,y2)
+    write(box[5]+box[6]*(x2-x1-1)+box[7])
+    for i in range(y2-y1-1):
+        gotoxy(x1,y1+1+i)
+        write(box[3]+' '*(x2-x1-1)+box[4])
+
+def getbases():
+  res = []
+  i = 1
+  while True and not shutdown():
+    fb = getfbase(i)
+    if not fb: break
+    res.append(fb)
+    i+=1
+  return res
+  
+def getgroups():
+  res = []
+  i = 0
+  while True and not shutdown():
+    fg = getfgroup(i)
+    if not fg: break
+    res.append(fg)
+    i+=1
+  return res
+  
+def fbase_stat_id(i):
+  fbase = getfbaseid(i)
+  if not fbase:
+    return 0,0,0
+  flist = fl_open(fbase["filename"])
+  if not flist:
+    return 0,0,0
+  done = False
+  fl_seek(flist, 0, True)
+  total = 0
+  totalkb = 0
+  totaldl = 0
+  while fl_found(flist) and not done and not shutdown():
+    fileinfo = fl_getfile(flist)
+    total = fileinfo["total"]
+    if total == 0:
+      totalkb = 0
+      totaldl = 0
+      break
+    totalkb += fileinfo["size"]
+    totaldl += fileinfo["dls"]
+
+    fl_next(flist); 
+
+  fl_close(flist)
+  return total,totalkb,totaldl
+  
+def getfilesbaseid(i):
+  files = []
+  fbase = getfbaseid(i)
+  if fbase is None:
+    msgdialog(' Error ','FileBase not found!')
+    return []
+  flist = fl_open(fbase["filename"]);
+  if flist is None:
+    msgdialog(' Error ','Could not retrieve file list.')
+    return []
+  done = False
+  fl_seek(flist, 0, True)
+  while fl_found(flist) and not done and not shutdown():
+    ff = {}
+    fileinfo = fl_getfile(flist)
+    ff['desc'] = fl_getdesc(flist)
+    ff['name'] = fileinfo["filename"]
+    ff['total'] = fileinfo["total"]
+    ff['num'] = fileinfo["number"]
+    ff['date'] = fileinfo["date"]
+    ff['size'] = fileinfo["size"]
+    ff['dl'] = fileinfo["dls"]
+    ff['user'] = fileinfo["ulname"]
+    files.append(ff)
+    fl_next(flist)
+  fl_close(flist)
+  #return files
+  return     sorted(files, key = lambda i: i['name']) 
+  
+def replacevars(s):
+  f = str(s).replace('{script}',getcfg()['script'])
+  f = f.replace('{system}',getcfg()['system'])
+  f = f.replace('{text}',getcfg()['text'])
+  f = f.replace('{theme}',getcfg()['theme'])
+  f = f.replace('{deftheme}',getcfg()['deftheme'])
+  return f
+
+def loadmainlist():
+  res = []
+  with open(vbasedir+'list.csv','r') as f:
+    items = f.readlines()
+
+  for i in range(len(items)):
+    if items[i][:1].lstrip()=='#' or items[i][:1].lstrip()=='':
+      continue
+    else:
+      fields = items[i].split(';')
+      if user['level']>=int(fields[2]):
+        if len(fields) == 3:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2]})
+        elif len(fields) == 4:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'target':replacevars(fields[3].strip('\n')), 'desc':''})
+        elif len(fields) == 5:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'target':replacevars(fields[3]), 'desc':fields[4].strip('\n')})
+  return res
+  
+def loadvbaselist(fname):
+  if not os.path.isfile(fname): return []
+  res = []
+  with open(fname,'r') as f:
+    items = f.readlines()
+
+  for i in range(len(items)):
+    if items[i][:1].lstrip()=='#' or items[i][:1].lstrip()=='':
+      continue
+    else:
+      fields = items[i].split(';')
+      if user['level']>=int(fields[2]):
+        if len(fields) == 3:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2]})
+        elif len(fields) == 4:
+          res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'target':replacevars(fields[3].strip('\n')), 'desc':['No Description']})
+        elif len(fields) == 5:
+          s = fields[4].strip('\n')
+          if s[:1] == '!':
+            with open(replacevars(s[1:]),'r') as fn:
+              ln = fn.readlines()
+            res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'target':replacevars(fields[3]), 'desc':ln})
+          else:
+            res.append({'name':fields[0],'type':fields[1],'acs':fields[2],'target':replacevars(fields[3]), 'desc':[s]})
+  return res  
+  
+def drawtreelist():
+  write('|07|16|CL')
+  showfile(vbasedir+'groups.ans',0,False,False,False)
+  writexy(7,3,14,'Groups//Bases')
+  
+def drawfilelist(name):
+  write('|07|16|CL')
+  showfile(vbasedir+'files.ans',0,False,False,False)
+  writexy(4,3,14,name[:20])
+
+def drawvbaselist(name):
+  write('|07|16|CL')
+  showfile(vbasedir+'vbases.ans',0,False,False,False)
+  writexy(4,3,14,name[:20])  
+
+def treelist(items,x1,y1,x2,y2,hc=15,nc=7,sel=1,sb=scrollbar):
+    global exit_keys
+    global exit_code
+    
+    search_txt = ''
+    search_x = 12
+    search_y = 23
+    search_cl= 8
+    
+    def updatebar():
+        if sb["enable"] == False: Return
+        for i in range(0,y2-y1+1):
+            writexy(x2,y1+i,sb["loatt"],sb["lochar"])
+        if len(items) < 2:
+            y = 0
+        else:
+            y = (selbar * (y2-y1)) // (len(items)-1)
+        writexy(x2,y1+y,sb["hiatt"],sb["hichar"])
+    
+    if len(items)<1:
+      return -1
+    exit_code = ""
+    key = ""
+    value = -1
+    done = False
+    if sel <= len(items):
+        top = sel-(y2-y1)
+        if top < 1: top = 0
+    else:
+        top = 0
+    if sel <= len(items):
+        selbar = sel
+    else:
+        selbar = 0
+    if items[selbar]['type'] == 'vbase':
+        selbar +=1
+    
+    drawtreelist()
+    while done == False and not shutdown():
+        #writexy(1,1,7,str(top)+"/"+str(selbar)+"/"+str(len(items)))
+        gotoxy(x1,y1)
+        y = top
+        while y1+y-top<=y2:
+            if y<len(items):
+                if items[y]['type'] == 'group':
+                    writexy(x1,y1+y-top,group_cl,items[y]['name'].ljust(x2-x1, group_fill_ch)[:x2-x1])
+                elif items[y]['type'] == 'mbase':
+                    writexy(x1,y1+y-top,mbase_cl,items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+                elif items[y]['type'] == 'vbase':
+                    writexy(x1,y1+y-top,vbase_cl,items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+            else:
+                writexy(x1,y1+y-top,nc," ".ljust(x2-x1, " ")[:x2-x1])
+            y += 1
+        if items[selbar]['type'] == 'vbase':
+            writexy(x1,y1+selbar-top,vbase_clsel,items[selbar]['name'].ljust(x2-x1, " ")[:x2-x1])
+        elif items[selbar]['type'] == 'mbase':
+            writexy(x1,y1+selbar-top,mbase_clsel,items[selbar]['name'].ljust(x2-x1, " ")[:x2-x1])
+            total,totalkb,totaldl = fbase_stat_id(int(items[selbar]['target']))
+            writexy(40,3,7,str(total).ljust(5,' '))
+            writexy(40,4,7,str(formatsize(totalkb)).ljust(8,' '))
+            writexy(40,5,7,str(totaldl).ljust(5,' '))
+        textcolor(7)
+        cleararea(27,10,77,22,' ')
+
+        ddesc = items[selbar].get('desc')
+        if ddesc:
+            gotoxy(27,10)
+            write(ddesc)
+            
+        
+        updatebar()
+        gotoxy(1,25)
+        
+        key, extended = getkey()
+        
+        if extended:
+          
+          if key == KEY_UP:
+              selbar=selbar-1
+              if items[selbar]['type'] == 'group':
+                  selbar -=1
+              if selbar < 1:
+                  selbar = 1
+                  top = 0
+                  if items[selbar]['type'] == 'group':
+                    selbar +=1
+              if selbar < top:
+                  top = selbar
+                  if items[selbar]['type'] == 'group':
+                    selbar -=1
+          elif key == KEY_PGUP:
+              selbar = selbar - (y2-y1)
+              if selbar < 0:
+                  selbar = 0
+                  top = 0
+                  if items[selbar]['type'] == 'group':
+                      selbar +=1
+              else:
+                  top = top - (y2-y1)
+                  if top < 0:
+                      top = 0
+          elif key == KEY_PGDN:
+              selbar = selbar+(y2-y1)
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              top = top+(y2-y1)
+              if top > len(items)-1-(y2-y1):
+                  top = len(items)-1-(y2-y1)
+                  if top < 0:
+                      top = 0
+              if items[selbar]['type'] == 'group' and selbar < len(items):
+                  selbar +=1
+          elif key == KEY_END:
+              selbar=len(items)-1
+              if len(items)-(y2-y1)-1 > 0:
+                  top = len(items)-(y2-y1)-1
+              else:
+                  top = 0
+              if items[selbar]['type'] == 'group':
+                  selbar -=1
+          elif key == KEY_HOME:
+              selbar=0
+              top = 0
+              if items[selbar]['type'] == 'group':
+                    selbar +=1
+          elif key == KEY_DOWN: 
+              selbar+=1
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+                  if items[selbar]['type'] == 'group':
+                      selbar -= 1
+              else:
+                  if items[selbar]['type'] == 'group':
+                      selbar +=1
+                      if selbar-top > y2-y1:
+                          top += 1
+              if selbar-top > y2-y1:
+                  top += 1
+        else:
+          key = key.upper()
+          if key == KEY_ENTER:
+              value = selbar
+              if items[selbar]['type'] == 'mbase':
+                  clrscr()
+                  log('Entered: '+items[selbar]['name'])
+                  filelistmenu(items[selbar]['name'],int(items[selbar]['target']),getfilesbaseid(int(items[selbar]['target'])),3,6,23,22,mbase_clsel,mbase_cl)
+              elif items[selbar]['type'] == 'vbase':
+                  clrscr()
+                  log('Entered: '+items[selbar]['name'])
+                  vbaselistmenu(items[selbar]['name'],loadvbaselist(items[selbar]['target']),3,6,23,22,vbase_clsel,vbase_cl)
+              drawtreelist()
+          elif key == KEY_ESCAPE:
+              done = True
+          elif key == 'D':
+              menucmd('FD','')
+              log('Downloaded some files')
+              drawtreelist()
+          elif key == 'E':
+              editqueue()
+              log('Edited the Queue')
+              drawtreelist()
+          elif key == 'N':
+              newfiles()
+              log('Checked New Files')
+              drawtreelist()
+          elif key == 'H':    
+              write('|07|16|CL')
+              showfile(vbasedir+'groups_help.ans',0,False,False,False)
+              if issysop():
+                  writexy(4,18,13,'/E  File Directory Editor')
+                  writexy(4,19,13,'/U  Mass Upload Files')
+                  writexy(4,20,13,'/F  File Base Editor')
+                  writexy(4,21,13,'/J  File Group Editor')
+              getkey()
+              drawtreelist()
+          elif key == 'S':
+              menucmd('FS','')
+              log('Made a search')
+              drawtreelist()
+          elif key == '/':
+              ch = onekey('UEFJ', False)
+              ch = ch.upper()
+              if ch == 'U' and issysop(): menucmd('F1','')
+              if ch == 'E' and issysop(): menucmd('F2','')
+              if ch == 'F' and issysop(): menucmd('*F','')
+              if ch == 'J' and issysop(): menucmd('*R','')
+              drawtreelist()
+          elif key == 'F':
+              filelist()
+              log('Got the Filelist')
+              drawtreelist()
+          elif key.upper() == 'U':
+              log('Uploaded a file')
+              if user['level']<sysop_level:
+                  upload()
+              else:
+                  upload()
+              drawtreelist()
+          elif key in exit_keys:
+              exit_code = key
+              value = selbar
+              done = True
+        
+            
+    return value
+    
+def vbaselistmenu(name,items,x1,y1,x2,y2,hc=15,nc=7,sel=1,sb=scrollbar):
+    global exit_keys
+    global exit_code
+    
+    dizi = 0
+    
+    def diz(index):
+        j = 0
+        
+        while j < 13 and j<len(items[selbar]['desc']):
+            writexy(28,10+j,8,items[selbar]['desc'][dizi+j])
+            j+=1
+    
+    def updatebar():
+        if sb["enable"] == False: Return
+        for i in range(0,y2-y1+1):
+            writexy(x2,y1+i,sb["loatt"],sb["lochar"])
+        if len(items) < 2:
+            y = 0
+        else:
+            y = (selbar * (y2-y1)) // (len(items)-1)
+        writexy(x2,y1+y,sb["hiatt"],sb["hichar"])
+    
+    if len(items)<1:
+      return -1
+    exit_code = ""
+    key = ""
+    value = -1
+    done = False
+    if sel <= len(items):
+        top = sel-(y2-y1)
+        if top < 1: top = 0
+    else:
+        top = 0
+    if sel <= len(items):
+        selbar = sel
+    else:
+        selbar = 0
+    if items[selbar]['type'] == 'vbase':
+        selbar +=1
+    
+    drawvbaselist(name)
+    while done == False and not shutdown():
+        #writexy(1,1,7,str(top)+"/"+str(selbar)+"/"+str(len(items)))
+        gotoxy(x1,y1)
+        y = top
+        while y1+y-top<=y2:
+            if y<len(items):
+                if items[y]['type'] == 'group':
+                    writexy(x1,y1+y-top,vgroup_cl,items[y]['name'].ljust(x2-x1, vgroup_fill_ch)[:x2-x1])
+                elif items[y]['type'] == 'file':
+                    writexy(x1,y1+y-top,vfile_cl,items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+                elif items[y]['type'] == 'link':
+                    writexy(x1,y1+y-top,vlink_cl,items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+            else:
+                writexy(x1,y1+y-top,nc," ".ljust(x2-x1, " ")[:x2-x1])
+            y += 1
+        
+        writexy(x1,y1+selbar-top,vbase_clsel,items[selbar]['name'].ljust(x2-x1, " ")[:x2-x1])
+        
+        if items[selbar]['type'] == 'file':
+            writexy(28,3,15,items[selbar]['name'].ljust(50,' ')[:50])
+            writexy(34,4,7,str(formatsize(os.path.getsize(items[selbar]['target']))).ljust(10,' '))
+            writexy(34,5,7,str(datetime.datetime.fromtimestamp(os.path.getmtime(items[selbar]['target']))).ljust(30,' '))
+        elif items[selbar]['type'] == 'link':
+            writexy(28,3,15,items[selbar]['target'].ljust(50,' ')[:50])
+            writexy(34,4,7,"".ljust(10,' '))
+            writexy(34,5,7,"".ljust(30,' '))
+            
+        textcolor(7)
+        cleararea(27,10,77,23,' ')
+        
+        diz(dizi)
+        
+        updatebar()
+        gotoxy(1,25)
+        
+        key, extended = getkey()
+        
+        if extended:
+        
+          if key == KEY_UP:
+              dizi = 0
+              selbar=selbar-1
+              if items[selbar]['type'] == 'group':
+                  selbar -=1
+              if selbar < 1:
+                  selbar = 0
+                  if items[selbar]['type'] == 'group':
+                    selbar +=1
+              if selbar < top:
+                  top = selbar
+                  if items[selbar]['type'] == 'group':
+                    selbar -=1
+          elif key == KEY_PGUP:
+              dizi = 0
+              selbar = selbar - (y2-y1)
+              if selbar < 0:
+                  selbar = 0
+                  top = 0
+                  if items[selbar]['type'] == 'group':
+                      selbar +=1
+              else:
+                  top = top - (y2-y1)
+                  if top < 0:
+                      top = 0
+          elif key == KEY_PGDN:
+              dizi = 0
+              selbar = selbar+(y2-y1)
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              top = top+(y2-y1)
+              if top > len(items)-1-(y2-y1):
+                  top = len(items)-1-(y2-y1)
+                  if top < 0:
+                      top = 0
+              if items[selbar]['type'] == 'group' and selbar < len(items):
+                  selbar +=1
+          elif key == KEY_END:
+              dizi = 0
+              selbar=len(items)-1
+              if len(items)-(y2-y1)-1 > 0:
+                  top = len(items)-(y2-y1)-1
+              else:
+                  top = 0
+              if items[selbar]['type'] == 'group':
+                  selbar -=1
+          elif key == KEY_HOME:
+              dizi = 0
+              selbar=0
+              top = 0
+              if items[selbar]['type'] == 'group':
+                    selbar +=1
+          elif key == KEY_DOWN: 
+              dizi = 0
+              selbar=selbar+1
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+                  if items[selbar]['type'] == 'group':
+                      selbar -=1
+              if selbar > top+y2-y1:
+                  top += 1
+              if items[selbar]['type'] == 'group' and selbar < len(items)-1:
+                  selbar +=1
+        else:
+          key = key.upper()
+          if key == KEY_ENTER:
+              value = selbar
+              if items[selbar]['type'] == 'link':
+                  if y1+selbar-top-1<=18:
+                      if issysop():
+                          write('|#V#Options#'+str(x1+10)+'#'+str(y1+selbar-top-1)+'# Options #D-Download,V-View Link,B-Back#')
+                      else:
+                          write('|#V#Options#'+str(x1+10)+'#'+str(y1+selbar-top-1)+'# Options #D-Download,V-View Link,B-Back#')
+                  else:
+                      if issysop():
+                          write('|#V#Options#'+str(x1+10)+'#'+str(y1+selbar-top-7)+'# Options #D-Download,V-View Link,B-Back#')
+                      else:
+                          write('|#V#Options#'+str(x1+10)+'#'+str(y1+selbar-top-7)+'# Options #D-Download,V-View Link,B-Back#')
+                  if issysop():
+                      ch = onekey(chr(13) + 'DVB', False)
+                  else:
+                      ch = onekey(chr(13) + 'DVB', False)
+                  ch = ch.upper()
+                  if ch == 'D':
+                      if getlink(items[selbar]['target'],items[selbar]['name'])< 0:
+                        msgdialog(' Error ','Could not retrieve file.',False)
+                        center(7*16,14,'Press a key to continue...')
+                        log('Unsuccesfully tried to get: '+items[selbar]['target']+', '+items[selbar]['name'])
+                        pause()
+                      else:
+                        clrscr()
+                        menucmd('F3',vbasedir+os.sep+'tmp'+os.sep+items[selbar]['name'])
+                        log('Got file:'+items[selbar]['name'])
+                        os.remove(vbasedir+os.sep+'tmp'+os.sep+items[selbar]['name'])
+                  elif ch == 'V':
+                      msgdialog(' Link ',items[selbar]['target'][:75])
+              elif items[selbar]['type'] == 'file':
+                  if y1+selbar-top-1<=18:
+                      write('|#V#Options#'+str(x1+10)+'#'+str(y1+selbar-top-1)+'# Options #D-Download,V-View,B-Back#')
+                  else:
+                      write('|#V#Options#'+str(x1+10)+'#'+str(y1+selbar-top-7)+'# Options #D-Download,V-View,B-Back#')
+                  ch = onekey(chr(13) + 'DVMB', False)
+                  ch = ch.upper()
+                  if ch == 'D':
+                      menucmd('F3',items[selbar]['target'])
+                      log('Downloaded: '+items[selbar]['target'])
+                  elif ch == 'V':
+                      fn = items[selbar]['target'].upper()
+                      fn = fn.split('.')
+                      if ('ZIP' in fn[-1:]) or ('RAR' in fn[-1:]) or ('ARJ' in fn[-1:]):
+                          menucmd('FV',items[selbar]['target'])
+                      else:
+                          menucmd('GV','ansiviewtxt;ansiviewh;0;'+items[selbar]['target'])
+              drawvbaselist(name)
+          elif key == KEY_ESCAPE:
+              done = True
+          
+          elif key == '[':
+              dizi -= 1
+              if dizi <0: dizi = 0
+              diz(dizi)
+          elif key == ']':
+              if dizi + 13 < len(items[selbar]['desc']):
+                  dizi += 1
+              diz(dizi)
+          elif key == 'H':
+              write('|07|16|CL')
+              showfile(vbasedir+'groups_help.ans',0,False,False,False)
+              getkey()
+              drawvbaselist(name)
+          elif key == '/':
+              ch = onekey('UEFJ', False)
+              ch = ch.upper()
+              if ch == 'U' and issysop(): menucmd('F1','')
+              if ch == 'E' and issysop(): menucmd('F2','')
+              if ch == 'F' and issysop(): menucmd('*F','')
+              if ch == 'J' and issysop(): menucmd('*R','')
+              drawvbaselist(name)
+          elif key.upper() == 'U':
+              if user['level']<sysop_level:
+                  upload()
+              else:
+                  menucmd('FU','')
+              drawtreelist()
+          elif key in exit_keys:
+              exit_code = key
+              value = selbar
+              done = True
+        
+            
+    return value    
+    
+def getgroupfromacs(acs):
+  p = acs.find('z')
+  if p < 0:
+    return -1
+  p += 1
+  v = ''
+  while True:
+    c = acs[p:p+1]
+    if ord(c) in range(48,58):
+      v += c
+    else:
+      break
+    p += 1
+    if p ==  len(acs): break
+  return int(v)
+    
+def filelistmenu(name,bid,items,x1,y1,x2,y2,hc=15,nc=7,sel=0,sb=scrollbar):
+    global exit_keys
+    global exit_code
+    
+    dizi = 0
+    
+    def diz(index):
+        j = 0
+        
+        while j < 13 and j<len(items[selbar]['desc']):
+            writexy(28,10+j,8,items[selbar]['desc'][dizi+j])
+            j+=1
+    
+    def updatebar():
+        if sb["enable"] == False: Return
+        for i in range(0,y2-y1+1):
+            writexy(x2,y1+i,sb["loatt"],sb["lochar"])
+        if len(items) < 2:
+            y = 0
+        else:
+            y = (selbar * (y2-y1)) // (len(items)-1)
+        writexy(x2,y1+y,sb["hiatt"],sb["hichar"])
+    
+    if len(items)<1:
+        msgdialog(' Error ','No items to display.')
+        return -1
+    exit_code = ""
+    key = ""
+    value = -1
+    done = False
+    if sel <= len(items):
+        top = sel-(y2-y1)
+        if top < 1: top = 0
+    else:
+        top = 0
+    if sel <= len(items):
+        selbar = sel
+    else:
+        selbar = 0
+    
+    fbase = getfbaseid(int(bid))
+    menucmd('FA',str(bid))
+    drawfilelist(name)
+    while done == False and not shutdown():
+        gotoxy(x1,y1)
+        y = top
+        while y1+y-top<=y2:
+            if y<len(items):
+                writexy(x1,y1+y-top,nc,items[y]['name'].ljust(x2-x1, " ")[:x2-x1])
+            else:
+                writexy(x1,y1+y-top,nc," ".ljust(x2-x1, " ")[:x2-x1])
+            y += 1
+        
+        writexy(x1,y1+selbar-top,hc,items[selbar]['name'].ljust(x2-x1, " ")[:x2-x1])
+        writexy(28,3,15,items[selbar]['name'].ljust(50,' ')[:50])
+        writexy(34,4,15,str(formatsize(items[selbar]['size'])).ljust(10,' '))
+        writexy(34,5,15,datestr(dated2u(items[selbar]["date"]), "NNN DD YYYY HH:II:SS").ljust(30,' '))
+        writexy(38,6,15,items[selbar]['user'].ljust(17,' '))
+        writexy(67,6,15,str(items[selbar]['dl']).ljust(5,' '))
+        cleararea(27,10,77,23,' ')
+        
+        diz(dizi)
+        
+        updatebar()
+        gotoxy(1,25)
+        
+        key, extended = getkey()
+        
+        if extended:
+        
+          if key == KEY_UP:
+              dizi = 0
+              selbar=selbar-1
+              if selbar < 1:
+                  selbar = 0
+              if selbar < top:
+                  top = selbar
+          elif key == KEY_PGUP:
+              dizi = 0
+              selbar = selbar - (y2-y1)
+              if selbar < 0:
+                  selbar = 0
+                  top = 0
+              else:
+                  top = top - (y2-y1)
+                  if top < 0:
+                      top = 0
+          elif key == KEY_PGDN:
+              dizi = 0
+              selbar = selbar+(y2-y1)
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              top = top+(y2-y1)
+              if top > len(items)-1-(y2-y1):
+                  top = len(items)-1-(y2-y1)
+                  if top < 0:
+                      top = 0
+          elif key == KEY_END:
+              dizi = 0
+              selbar=len(items)-1
+              if len(items)-(y2-y1)-1 > 0:
+                  top = len(items)-(y2-y1)-1
+              else:
+                  top = 0
+          elif key == KEY_HOME:
+              dizi = 0
+              selbar=0
+              top = 0
+          elif key == KEY_DOWN: 
+              dizi = 0
+              selbar=selbar+1
+              if selbar > len(items)-1:
+                  selbar = len(items)-1
+              if selbar > top+y2-y1:
+                  top += 1
+        else:
+          key = key.upper()
+          if key == KEY_ENTER:
+              if y1+selbar-top-1<=18:
+                  if issysop():
+                      write('|#V#1#'+str(x1+10)+'#'+str(y1+selbar-top-1)+'# Options #A-Add,D-Download,V-View,B-Base64 Encode,Q-Back#')
+                  else:
+                      write('|#V#1#'+str(x1+10)+'#'+str(y1+selbar-top-1)+'# Options #A-Add,D-Download,V-View,B-Base64 Encode,Q-Back#')
+              else:
+                  if issysop():
+                      write('|#V#1#'+str(x1+10)+'#'+str(y1+selbar-top-7)+'# Options #A-Add,D-Download,V-View,B-Base64 Encode,Q-Back#')
+                  else:
+                      write('|#V#1#'+str(x1+10)+'#'+str(y1+selbar-top-7)+'# Options #A-Add,D-Download,V-View,B-Base64 Encode,Q-Back#')
+              if issysop():
+                  ch = onekey(chr(13) + 'ADVQB', False)
+              else:
+                  ch = onekey(chr(13) + 'ADVQB', False)
+              ch = ch.upper()
+              if ch == 'D':
+                  menucmd('F3',fbase['path']+items[selbar]['name'])
+                  log('Downloaded file: '+fbase['path']+items[selbar]['name'])
+              elif ch == 'B':
+                  encode64(fbase['path']+items[selbar]['name'])
+                  log('Encoded file: '+fbase['path']+items[selbar]['name'])
+              elif ch == 'V':
+                  menucmd('FA',str(bid))
+                  #if 'z' in fbase['listacs']
+                  gg = getgroupfromacs(str(fbase['listacs']))
+                  if gg>0: 
+                      menucmd('FG',str(gg))
+                  fn = items[selbar]['name'].upper()
+                  fn = fn.split('.')
+                  #writexy(1,1,14,str(fn[-1:]))
+                  #pause()
+                  if ('ZIP' in fn[-1:]) or ('RAR' in fn[-1:]) or ('ARJ' in fn[-1:]):
+                      stuffkey(items[selbar]['name']+chr(13))
+                      menucmd('FV','')
+                  else:
+                      menucmd('GV','ansiviewtxt;ansiviewh;0;'+fbase['path']+items[selbar]['name'])
+              elif ch == 'A':
+                  menucmd('FA',str(bid))
+                  gg = getgroupfromacs(str(fbase['listacs']))
+                  if gg>0:
+                      menucmd('FG',str(gg))
+                  s=str(items[selbar]['name'])
+                  stuffkey(s+chr(13))
+                  menucmd('QA',str(s))
+                  log('Added file: '+items[selbar]['name'])
+              drawfilelist(name)
+          elif key == '[':
+              dizi -= 1
+              if dizi <0: dizi = 0
+              diz(dizi)
+          elif key == ']':
+              if dizi + 13 < len(items[selbar]['desc']):
+                  dizi += 1
+              diz(dizi)
+          elif key == KEY_ESCAPE:
+              done = True
+          elif key == 'H':    
+              write('|07|16|CL')
+              showfile(vbasedir+'groups_help.ans',0,False,False,False)
+              getkey()
+              drawfilelist(name)
+          elif key == '/':
+              ch = onekey('UEFJH', False)
+              ch = ch.upper()
+              if ch == 'U' and issysop(): menucmd('F1','')
+              if ch == 'E' and issysop(): menucmd('F2','')
+              if ch == 'F' and issysop(): menucmd('*F','')
+              if ch == 'J' and issysop(): menucmd('*R','')
+              drawfilelist(name)
+          elif key.upper() == 'U':
+              if user['level']<sysop_level:
+                  upload()
+                  log('Uploaded a file')
+              else:
+                  menucmd('FU','')
+              drawfilelist(name)
+          elif key in exit_keys:
+              exit_code = key
+              value = selbar
+              done = True
+        
+            
+    return value
+    
+clrscr()
+if user['level']<20:
+  msgdialog(' Message ','As a GUEST you cannot access the file area. Please register.')
+else:
+  if not os.path.isdir(vbasedir+'tmp'):
+    try:
+      os.mkdir(vbasedir+'tmp')
+    except:
+      writeln('Could not create TEMP dir. Exiting')
+      pause()
+      quit()
+
+  treelist(loadmainlist(),3,6,23,22)
+  gotoxy(1,24)

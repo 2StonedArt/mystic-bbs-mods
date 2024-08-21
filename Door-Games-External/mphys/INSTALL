@@ -1,0 +1,10 @@
+Mystic BBS Door
+
+Phys Org for Mystic BBS
+
+Install:
+
+1) modify bbs_path in physorg.py 
+2) schedule running of physorg.py for every hour or so
+3) compile physorg.mps and configure Mystic to run from menu
+

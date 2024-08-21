@@ -1,0 +1,18 @@
+// MRC themes list - Version 1.3
+// Format: 'ThemeName=Theme description'
+//
+// Max ThemeName length is 16 characters
+// Each theme also requires:
+//   - script/mrctheme-{ThemeName}.default.ini
+//   - script/mrctheme-{ThemeName}.{TermSize}.ini (if desired)
+//   - text/mrc-{ThemeName}.default.ans
+//   - text/mrc-{ThemeName}.{TermWidth}.ans (if desired)
+//
+// See the included theme files for examples
+//
+// Contributors wanted:
+// If you develop a theme and would like to have it included in the
+// release, please contact StackFault @ The Bottomless Abyss
+//
+original=Original MRC theme
+minimal=Minimal theme to maximize screen view

@@ -1,0 +1,370 @@
+from mystic_bbs import *
+
+import sys,os
+import json
+import re
+import datetime
+
+#=============================================================================
+# DO NOT EDIT BELOW!!!
+#=============================================================================
+
+cfg = getcfg()
+appdir = cfg['script']+'xqbbsdb'+os.sep
+datadir=cfg['data']
+sys.path.append(appdir)
+import bbsdbvar
+import bbsdbcom  
+
+tempdir = cfg['temp']
+logdir = cfg['logs']
+debug = False
+
+#load config file...
+cnf = {}
+if os.path.isfile(cfg['data']+bbsdbvar.prefix+'.cfg'):
+  cnf = bbsdbcom.loadjson2list(cfg['data']+bbsdbvar.prefix+'.cfg')
+else:
+  logerror('Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  sysoplog(255,'[bbsdbsql] Could not load config file ['+cfg['data']+bbsdbvar.prefix+'.cfg]. Make sure it exists.')
+  
+def dwrite(msg):
+  global debug
+  if debug:
+    writeln(msg)
+
+
+
+def sqlinsert(body):
+  dbfile = cfg['data']+bbsdbvar.prefix+'.sql'
+  conn = bbsdbcom.sqlconnect(dbfile)
+  cursor = conn.cursor()
+  cursor.execute("SELECT count(*) FROM bbs WHERE address = '"+body['address']+"'")
+  data=cursor.fetchone()[0]
+  if data==0 or data==None:
+    if not body['login']: body['login']=''
+    conn.execute('INSERT INTO "main"."bbs" '+
+    '("name", "address", "system", "users", "mods", "weekcalls", "weekusers", '+
+    '"totalcalls", "time", "days", "sysop", "themes", "fgroups", "location", "date", '+
+    '"nodes", "software", "os", "mgroups", "echonets","email","dialup","web","login") '+
+    'VALUES '+
+    '(\''+body['name']+'\', '+
+    '\''+body['address']+'\', '+
+    '\''+body['system']+'\', '+
+    '\''+str(body['users'])+'\', '+
+    '\''+bbsdbcom.list2csvline(body['mods'])+'\', '+
+    '\''+str(body['weekcalls'])+'\', '+
+    '\''+str(body['weekusers'])+'\', '+
+    '\''+str(body['totalcalls'])+'\', '+
+    '\''+body['time']+'\', '+
+    '\''+str(body['days'])+'\', '+
+    '\''+body['sysop']+'\', '+
+    '\''+str(body['themes'])+'\', '+
+    '\''+bbsdbcom.list2csvline(body['fgroups'])+'\', '+
+    '\''+body['location']+'\', '+
+    '\''+body['date']+'\', '+
+    '\''+str(body['nodes'])+'\', '+
+    '\''+body['software']+'\', '+
+    '\''+body['os']+'\', '+
+    '\''+bbsdbcom.list2csvline(body['mgroups']) +'\', '+
+    '\''+bbsdbcom.list2csvline(body['echonets']) +'\', '+
+    '\''+body['email']+'\', '+
+    '\''+body['dialup']+'\', '+
+    '\''+str(body['web'])+'\', '+
+    '\''+str(body['login'])+'\')')
+    conn.commit()
+    sysoplog(255,'[bbsdbsql] Record Inserted...')
+  else:
+    cursor.execute("SELECT date FROM bbs WHERE address = ?", (body['address'],))
+    data = cursor.fetchone()
+    recdate = data[0]
+    cursor.execute("SELECT * FROM bbs WHERE address = ?", (body['address'],))
+    data = cursor.fetchone()
+    sql = "UPDATE bbs SET "
+    if bbsdbcom.str2date(recdate) < datetime.datetime.now():
+      if body['name'] <> data[1] and data[1]==data[2]:
+        sql += "name = '"+body['name']+"', "
+      if data[3]=='unknown' and body['system']<>data[3]:
+        sql += "system = '"+body['system']+"', "
+      
+      if data[4]<>0 and data[4]<body['users']:
+        sql += "users = '"+str(body['users'])+"', "
+      
+      if data[5]=='' and body['mods']:
+        sql += "mods = '"+bbsdbcom.list2csvline(body['mods'])+"', "
+        
+      if data[6]<>0 and body['weekcalls']>data[6]:
+        sql += "weekcalls = '"+str(body['weekcalls'])+"', "
+        
+      if data[7]<>0 and body['weekusers']>data[7]:
+        "weekusers = '"+str(body['weekusers'])+"', "
+        
+      if data[8]<>0 and body['totalcalls']>data[8]:
+        "totalcalls = '"+str(body['totalcalls'])+"', "
+        
+      if data[10]<>0 and body['days']>data[10]:
+        sql += "days = '"+str(body['days'])+"', "
+        
+      if body['sysop']<>'unknown':
+        sql += "sysop = '"+body['sysop']+"', "
+        
+      if body['email']:
+        sql += "email = '"+body['email']+"', "
+        
+      if body['web']:
+        sql += "web = '"+body['web']+"', "
+        
+      if body['login']:
+        sql += "login = '"+body['login']+"', "
+        
+      if body['dialup']:
+        sql += "dialup = '"+body['dialup']+"', "
+        
+      if body['themes']>0:
+        sql += "themes = '"+str(body['themes'])+"', "
+        
+      if body['fgroups']:
+        sql += "fgroups = '"+bbsdbcom.list2csvline(body['fgroups'])+"', "
+      
+      if body['mgroups']:  
+        sql += "mgroups = '"+bbsdbcom.list2csvline(body['mgroups'])+"', "
+      
+      if body['echonets']:  
+        sql += "echonets = '"+bbsdbcom.list2csvline(body['echonets'])+"', "
+        
+      if body['location']<>'unknown':
+        sql += "location = '"+body['location']+"', "
+      
+      
+      sql += "nodes = '"+str(body['nodes'])+"', "
+      sql += "software = '"+body['software']+"', "
+      sql += "os = '"+body['os']+"', "
+      sql += "date = '"+body['date']+"', "
+      sql += "time = '"+body['time']+"' where address = '"+str(body['address'])+"';"
+      conn.execute(sql)
+      conn.commit()
+      sysoplog(255,'[bbsdbsql] Record Updated...')
+    else:
+      sysoplog(255,'[bbsdbsql] Record NOT Updated...')
+  
+  conn.close()
+  
+def processbody(fl):
+  with open(fl, 'r+') as fp:
+    lines = fp.readlines()
+    fp.seek(0)
+    fp.truncate()
+    fp.writelines(lines[1:-1])
+    
+  bd = bbsdbcom.loadjson2list(fl)
+  if bd:
+    sqlinsert(bd)
+  
+def createtable():
+  dbfile = cfg['data']+bbsdbvar.prefix+'.sql'
+  #if os.path.isfile(dbfile)==False:
+  conn = bbsdbcom.sqlconnect(dbfile)
+  conn.execute('''CREATE TABLE IF NOT EXISTS "bbs" (
+  "id"	INTEGER NOT NULL UNIQUE,
+  "name"	TEXT,
+  "address"	TEXT UNIQUE,
+  "system"	TEXT,
+  "users"	INTEGER,
+  "mods"	TEXT,
+  "weekcalls"	INTEGER,
+  "weekusers"	INTEGER,
+  "totalcalls"	INTEGER,
+  "time"	TEXT,
+  "days"	INTEGER,
+  "sysop"	TEXT,
+  "themes"	INTEGER,
+  "fgroups"	TEXT,
+  "location"	TEXT,
+  "date"	TEXT,
+  "nodes"	INTEGER,
+  "software"	TEXT,
+  "os"	TEXT,
+  "mgroups"	TEXT,
+  "echonets"	TEXT,
+  "email"	TEXT,
+  "dialup"	TEXT,
+  "web"	TEXT,
+  "login"	TEXT,
+  PRIMARY KEY("id" AUTOINCREMENT)
+  );''')
+  conn.close()
+
+#searches a message base for bbsdb records. if found updates the database.
+def searchbase(num):
+  mbase = getmbaseid(num)
+  if mbase is None:
+    sysoplog(255, '[bbsdbsql] No message base selected')
+    return False
+  
+  msg = msg_open(mbase["path"] + mbase["filename"]);
+  if msg is None:
+    sysoplog(255, '[bbsdbsql] No messages to process. Quiting...')
+    return False
+
+  msg_seek(msg, 0)
+
+  while msg_found(msg) and not shutdown():
+    msghdr  = msg_gethdr(msg)
+    last_msg = msghdr['number']
+    
+    if msghdr["subj"].startswith('bbsdb-'):
+      crc = msghdr["subj"][6:].strip()
+      msgtext = msg_gettxt(msg)
+      start = -1
+      for k in range(len(msgtext)):
+        if msgtext[k].startswith('>>> BEGIN'):
+          start = k
+          break
+      end = -1
+      for k in range(len(msgtext)):
+        if msgtext[k].startswith('>>> END'):
+          end = k
+          break
+      
+      body = msgtext[start:end]
+      
+      tempfile = cfg['temp']+'tmp.txt'
+      
+      with open(tempfile,'w') as f:
+        for line in body:
+          f.write(line+'\n')
+        f.write('>>> END\n')
+      fcrc = bbsdbcom.crc32(tempfile)
+      os.remove(tempfile)
+      
+      with open(tempfile,'w') as f:
+        for line in body:
+          f.write(bbsdbcom.rot47(line)+'\n')
+        f.write('>>> END\n')
+      if crc == fcrc:
+        processbody(tempfile)
+      os.remove(tempfile)
+      msg_delete(msg)
+    msg_next(msg)
+  msg_close(msg)
+  
+#scrapes a message base for addresses in the origin section of the posts. 
+#if the proper format is found updates the database.
+#the function gets the last N posts from each base, specified in the 
+#msgcount variable inside the config file. if the message base is not full
+#it will probably crash, but we dont care.
+def scrapebase(num):
+  mbase = getmbaseid(num)
+  
+  #regex = r'(telnet://.+(:d{4,})?)'
+  regex = r'((telnet\:\/\/)?[-a-zA-Z0-9._//=]+(:\d{2,}))'
+  findaddr = re.compile(regex, re.IGNORECASE)
+  
+  if mbase is None:
+    sysoplog(255, '[bbsdbsql] No message base selected')
+    return False
+  
+  msg = msg_open(mbase["path"] + mbase["filename"]);
+  if msg is None:
+    sysoplog(255, '[bbsdbsql] No messages to process. Quiting...')
+    return False
+
+  if 'base_lastpost'+str(num) in cnf:
+    last = cnf['base_lastpost'+str(num)]
+  else:
+    last = 0
+  msg_seek(msg, last)
+  
+  dwrite('Starting scrape from post: '+str(last))
+  last = 0
+  while msg_found(msg) and not shutdown():
+    msghdr  = msg_gethdr(msg)
+    last_msg = msghdr['number']
+    
+    body = msg_gettxt(msg)
+    
+    for line in body:
+      if 'ORIGIN' in line.upper():
+        addresses = findaddr.findall(line.replace(' ', '\n') )
+        if len(addresses)>0:
+          tmp = addresses[0][0].lower()
+          if '.' in tmp and len(tmp)>7 and '/' not in tmp:
+            tmp = tmp.replace('telnet://','')
+            tmp = tmp.replace('//','')
+            newbbs = tmp
+            dwrite('Found BBS: '+newbbs+'. Processing in DB. [post:'+str(msghdr['number'])+']')
+            dt = datetime.datetime.fromtimestamp(msghdr['date'])
+            info = {}
+            info['date'] = bbsdbcom.date2str(dt)
+            info['time'] = datetime.datetime.now().strftime("%H:%M:%S")
+            info['name'] = newbbs
+            info['location'] = 'unknown'
+            info['address'] = newbbs
+            info['echonets'] = []
+            info['nodes'] = 0
+            info['themes'] = 1
+            info['sysop'] = 'unknown'
+            info['software'] = 'unknown'
+            info['os'] = 'unknown'
+            info['email'] = ''
+            info['dialup'] = ''
+            info['web'] = ''
+            info['login'] = ''
+            info['totalcalls'] = 0
+            info['weekcalls'] = 0
+            info['weekusers'] = 0
+            info['days'] = 1
+            info['system'] = 'unknown'
+            info['users'] = 1
+            info['mgroups'] = []
+            info['fgroups'] = []
+            info['mods']=[]
+            sqlinsert(info)
+    msg_next(msg)
+    last = msghdr['number']
+  msg_close(msg)
+  cnf['base_lastpost'+str(num)]=last
+  bbsdbcom.savelist2json(cnf,cfg['data']+bbsdbvar.prefix+'.cfg')
+
+bbsdbcom.clrscr()
+createtable()
+if param_str(0).lower() == 'debug':
+  debug=True
+else:
+  debug=False
+  
+debug=True
+for base in cnf['base_id']:
+  dwrite('Searching in base: '+str(base))
+  searchbase(base)
+  scrapebase(base)
+
+
+#backup text
+'''
+if bbsdbcom.str2date(recdate) < datetime.datetime.now():
+      s = str("UPDATE bbs SET " +
+      "name = '"+body['name']+"', "+
+      "system = '"+body['system']+"', "+
+      "users = '"+str(body['users'])+"', "+
+      "mods = '"+bbsdbcom.list2csvline(body['mods'])+"', "+
+      "weekcalls = '"+str(body['weekcalls'])+"', "+
+      "weekusers = '"+str(body['weekusers'])+"', "+
+      "totalcalls = '"+str(body['totalcalls'])+"', "+
+      "time = '"+body['time']+"', "+
+      "days = '"+str(body['days'])+"', "+
+      "sysop = '"+body['sysop']+"', "+
+      "themes = '"+str(body['themes'])+"', "+
+      "fgroups = '"+bbsdbcom.list2csvline(body['fgroups'])+"', "+
+      "mgroups = '"+bbsdbcom.list2csvline(body['mgroups'])+"', "+
+      "echonets = '"+bbsdbcom.list2csvline(body['echonets'])+"', "+
+      "location = '"+body['location']+"', "+
+      "date = '"+body['date']+"', "+
+      "nodes = '"+str(body['nodes'])+"', "+
+      "software = '"+body['software']+"', "+
+      "os = '"+body['os']+"' "+
+      "where address = '"+str(body['address'])+"';")
+      conn.execute(s)
+      conn.commit()
+      sysoplog(255,'[bbsdbsql] Record Updated...')
+'''

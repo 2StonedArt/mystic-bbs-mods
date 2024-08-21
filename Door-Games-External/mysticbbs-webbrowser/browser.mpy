@@ -1,0 +1,313 @@
+import mystic_bbs as bbs
+import urllib2
+from bs4 import BeautifulSoup
+from urlparse import urljoin
+
+# Key constants
+KEY_U = 'U'
+KEY_H = 'H'
+KEY_L = 'L'
+KEY_Q = 'Q'
+KEY_W = 'W'
+KEY_S = 'S'
+KEY_A = 'A'
+KEY_D = 'D'
+content_buffer = []
+current_line = 0
+lines_per_page = 24  # Adjust the number of lines per page as needed
+url_history = []
+current_history_index = -1  # -1 indicates no history yet
+current_url = ""
+
+search_mode = False
+search_term = ""
+
+def search_text(content, term):
+    # Perform case-insensitive search
+    term = term.lower()
+    lines = content.lower().split('\n')
+
+    for idx, line in enumerate(lines):
+        if term in line:
+            return idx
+    return -1
+  
+def process_search():
+    global content_buffer, current_line, search_mode, search_term
+    # bbs.gotoxy(11, 00)
+    # bbs.getstr(1, 60, 1024, "Search mode")
+    bbs.write("|[X11|[Y00|[1Search mode: '{}' or press ESC to exit.".format(search_term))
+    while True:
+        key, extended = bbs.getkey()
+        # bbs.write('|07|16|CL')
+
+        if key == '\x1b':  # Escape key to exit search mode
+            search_mode = False
+            search_term = ""
+            display_page()
+            break
+
+        elif key == '\r':  # Enter key to perform search
+            result = search_text('\n'.join(content_buffer), search_term)
+            if result != -1:
+                current_line = result
+                search_mode = False
+                search_term = ""
+                display_page()
+                break
+            else:
+                search_mode = False
+                search_term = ""
+                bbs.write("\n|12No results found. Press ESC to exit search mode.")
+                break
+            continue  # Skip the rest of the loop in search mode
+
+        elif ord(key) >= 32 and ord(key) <= 126:  # Printable ASCII characters
+            search_term += key
+            bbs.write('|03|16|[X11|[Y00|[1')
+            bbs.write(search_term+"|15|16")
+
+  
+def add_to_history(url):
+    global url_history, current_history_index
+    # Add new URL and update the current index
+    current_history_index += 1
+    url_history = url_history[:current_history_index]  # Truncate future history if any
+    url_history.append(url)
+
+def fetch_page(url):
+    global current_url
+    try:
+        req = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib2.urlopen(req)
+        content_type = response.headers.get('content-type')
+
+        if 'text/html' in content_type:
+            # html_content = response.read()
+            html_content = response.read().decode('utf-8', 'ignore').encode('cp437', 'replace')
+            current_url = url
+            return html_content
+        else:
+            return "Content type is not text/html. Actual type: " + content_type
+    except Exception as e:
+        return "Error fetching page: " + str(e)
+
+def parse_html(html_content, base_url):
+    soup = BeautifulSoup(html_content, features="html.parser")
+
+    # Remove script and style elements
+    for script_or_style in soup(["script", "style"]):
+        script_or_style.decompose()
+
+    # Adding space between <a> tags and keeping track of links
+    links = []
+    for idx, link in enumerate(soup.find_all('a'), 1):
+        if 'href' in link.attrs:
+            absolute_url = urljoin(base_url, link['href'])
+            links.append((str(idx), absolute_url))  # Store the index and href
+            link_number = '|08[|11{}|08]|15 '.format(idx)  # Python 2 compatible string formatting
+            link.insert_before(link_number)
+            link.insert_after(" ")
+
+    # Only strip empty lines if there are more than 2 consecutively
+    text = soup.get_text()
+    lines = text.splitlines()
+    processed_lines = []
+    empty_line_count = 0
+
+    for line in lines:
+        stripped_line = line.strip()
+        if not stripped_line:  # It's an empty line
+            empty_line_count += 1
+            if empty_line_count <= 1:
+                processed_lines.append(stripped_line)
+        else:
+            empty_line_count = 0
+            processed_lines.append(stripped_line)
+
+    text = '\n'.join(processed_lines)
+    # text = ' '.join(processed_lines)
+
+    return text, links
+
+
+def display_help():
+    # bbs.write("|#B#2#12#Help Menu#[|15U|07] - Enter URL   [|15H|07] - Show this help dialog   [|15ESC|07] - Quit#")
+    bbs.write("|#V#2#30#10# Help Menu #U-Enter URL,L-Link Input Mode,W-Scroll Up,S-Scroll Down,A-Previous Page,D-Next Page,H-Show this help dialog,Q-Quit#")
+
+def clear_screen():
+    bbs.write('|CL')
+
+def go_back():
+    global current_history_index
+    if current_history_index > 0:
+        current_history_index -= 1
+        return url_history[current_history_index]
+    return None
+
+def go_forward():
+    global current_history_index
+    if current_history_index < len(url_history) - 1:
+        current_history_index += 1
+        return url_history[current_history_index]
+    return None
+
+def process_url(url):
+    global content_buffer, current_line
+
+    # Check if the URL already starts with "http://" or "https://"
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = "http://" + url
+
+    bbs.writeln('|[0')
+    bbs.writeln("Fetching URL: " + url)
+    html_content = fetch_page(url)
+    # bbs.writeln("Fetched content length: " + str(len(html_content)))
+
+    if html_content:
+        text_content, links = parse_html(html_content, url)
+        bbs.write("|15|16")
+        content_buffer = text_content.split('\n')  # Split content into lines
+        current_line = 0  # Reset to the beginning of the buffer
+        display_page()  # Display the first page of content
+        add_to_history(url)
+        return links
+    else:
+        bbs.writeln("No content fetched.")
+        return []
+
+def display_page():
+    global content_buffer, current_line, lines_per_page
+    clear_screen()
+    bbs.writeln("")
+
+    # Display a portion of the content buffer
+    for i in range(lines_per_page):
+        if current_line + i < len(content_buffer):
+            bbs.writeln(content_buffer[current_line + i].encode('cp437', 'replace'))
+        else:
+            break
+    display_header()  # Re-display the header
+    
+def enter_url():
+    url_buffer = ''
+    display_header()  # Initial header display
+    bbs.writeln('|[X11|[Y00|07|16_')
+    while True:
+        key, extended = bbs.getkey()
+        bbs.writeln('|[X11|[Y00|[1')
+
+        if key == '\r':  # Enter key
+            return url_buffer
+        elif key == '\x1b':  # Escape key
+            return None
+        elif key == '\x08':  # Backspace key
+            bbs.write('|07|16|CL')
+            display_header()  # Initial header display
+            url_buffer = url_buffer[:-1]
+        elif ord(key) in range(32, 127):  # Printable ASCII characters
+            url_buffer += key
+        
+        # Overwrite the current line with the new URL
+        bbs.write("|[X11|[Y00|02" + url_buffer)
+
+def display_header():
+    global current_url
+    bbs.write("|[X00|[Y00")
+    bbs.showfile("themes/zeal/text/browser_header.ans", 0, False, False, False)
+    bbs.writeln("|[X11|[Y00|02"+current_url)
+
+def main():
+    global current_line, lines_per_page, search_mode, search_term
+    clear_screen()
+    bbs.write('|[0')
+    display_header()  # Initial header display
+
+    links = []  # Initialize links list
+    link_selection_mode = False
+    link_input_buffer = ''  # Buffer to store multi-digit link inputs
+    display_help()
+
+
+    while True:
+        if link_selection_mode:
+            bbs.write("|[X00|[Y00|11\xDB|08")
+
+        key, extended = bbs.getkey()
+
+        if search_mode:
+            process_search()
+        else:
+            if key == '?':  # Enter search mode when '?' is pressed
+                search_mode = True
+                search_term = ""
+                process_search()
+                continue  # Skip the rest of the loop in search mode
+
+        # Scroll up
+        if key.upper() == KEY_W:  # Page Up key code (adjust as needed)
+            if current_line > 0:
+                current_line = max(0, current_line - lines_per_page)
+                display_page()
+
+        # Scroll down
+        elif key.upper() == KEY_S:  # Page Down key code (adjust as needed)
+            if current_line + lines_per_page < len(content_buffer):
+                current_line = min(len(content_buffer) - lines_per_page, current_line + lines_per_page)
+                display_page()
+
+        # Implementing back and forward navigation
+        elif key.upper() == KEY_A: 
+            url = go_back()
+            if url:
+                links = process_url(url)
+
+        elif key.upper() == KEY_D:
+            url = go_forward()
+            if url:
+                links = process_url(url)
+
+        if link_selection_mode:
+            if key.isdigit():
+                #should most definitely use getstr instead https://wiki.mysticbbs.com/doku.php?id=python_functions#functiongetstr
+                link_input_buffer += key  # Accumulate digit inputs
+                bbs.write("|[X69|[Y00|11"+link_input_buffer)  # Display current input
+            elif key == '\r':  # Enter key to confirm link selection
+                if link_input_buffer:
+                    link_number = int(link_input_buffer)
+                    if link_number <= len(links) and link_number > 0:
+                        url = links[link_number - 1][1]  # Get the URL from the link mapping
+                        links = process_url(url)  # Process the new URL
+                    link_input_buffer = ''  # Clear the buffer after processing
+                link_selection_mode = False  # Exit link selection mode
+                # display_header()
+            if key == '\x1b':  # Escape key to cancel link selection
+                link_input_buffer = ''
+                link_selection_mode = False
+                display_header()
+            elif key.upper == KEY_Q: # to cancel link selection
+                link_input_buffer = ''
+                link_selection_mode = False
+                display_header()
+            continue  # Skip the rest of the loop in link selection mode
+
+        if key == '\x1b':  # Escape key
+            break
+
+        elif key.upper == KEY_Q:
+            break
+
+        elif key.upper() == KEY_U:
+            url = enter_url()
+            if url:
+                links = process_url(url)  # Process the entered URL
+
+        elif key.upper() == KEY_H:
+            display_help()
+
+        elif key.upper() == KEY_L:
+            link_selection_mode = True
+            link_input_buffer = ''
+
+if __name__ == "__main__":
+    main()

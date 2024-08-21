@@ -1,0 +1,12 @@
+BULLS - Mystic Bulletins Alternative
+Bulls is an alternative "Replacement" for
+Mystic BBS's Bulletin program. Instead of
+having to have a BULLETIN.ASC in the
+text folder and only having the bulletins
+in bullet##.asc/ans format, now you can
+point the Bulletins to Any ASCII/ANS File
+you want. This also presents a nice
+Scroll-Bar selection method.  It will
+tell the user if a Bulletin is NEW since
+they last logged on.
+By Gary Crunk, anotherbbs.bbsindex.com!

@@ -1,0 +1,45 @@
+#
+# (c) 2018 Last Update from Infoline
+#
+
+1) Install python packages
+
+  pip install cmd2
+  pip install prettytable
+
+2) Go to: https://contacts.google.com and export Your contacts to csv
+
+3) rename contacts file from google zenpho.csv and put it to ZENPHOA1 dir
+
+4) change bbs_path in import.py
+
+5) run: 
+  
+  $ python import.py
+
+6) edit qry.sh and change BBS_PATH to data directory of Your BBS
+
+7) run ./qry.sh and test whether the contacts has been loaded:
+
+  SQLITE> select count(*) from contacts;
+
+8) copy zenpho.py and zenpho.sh to Your BBS Scripts directory
+
+9) edit BBS_PATH in zenpho.sh and give it root of Your BBS
+
+10) configure BBS Menu like this:
+
+  a) run mystic -cfg
+  b) Editors -> Menu Editor
+  c) In Command list of e.g. Main:
+    
+    Display Text: (Z) Zen Phonebook
+    LightBar Low: Zen Phonebook
+    LightBar High: Zen Phonebook
+    Hot Key: Z
+    Access: give permission to correct group e.g. s255
+    Command: (D3) Exec DOOR32 program, Data e.g. /u01/bbs/scripts/zenpho.sh
+
+
+   
+

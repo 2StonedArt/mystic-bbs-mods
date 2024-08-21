@@ -1,0 +1,420 @@
+from mystic_bbs import *
+from datetime import datetime
+import os, pickle, json, calendar, time, operator, subprocess, requests, sys
+
+user = getuser(0)
+cfg = getcfg(0)
+script_path = cfg["script"]
+handle = user["handle"]
+name = user["name"]
+canexit = "no"
+version = "1.01[mL]"
+
+db_filename = script_path+"/"+"mL-ham_logbook.dat"
+db = {}
+db["users"] = {}
+db["logs"] = {}
+isAborted = False
+
+## define FG colours
+DBLK = "|00"
+DBLU = "|01"
+DGRN = "|02"
+DCYN = "|03"
+DRED = "|04"
+DMAG = "|05"
+DYEL = "|06"
+DGRY = "|07"
+LBLK = "|08"
+LBLU = "|09"
+LGRN = "|10"
+LCYN = "|11"
+LRED = "|12"
+LMAG = "|13"
+LYEL = "|14"
+LGRY = "|15"
+
+## define BG colours
+BBLK = "|16"
+BBLU = "|17"
+BGRE = "|18"
+BCYN = "|19"
+BRED = "|20"
+BMAG = "|21"
+BBRN = "|22"
+BGRY = "|23"
+
+def initScreen() :
+  writeln("|CL|07")
+
+def saveDB():
+  global db
+  global db_filename
+  with open(db_filename, 'wb') as fhandle:
+    pickle.dump(db, fhandle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def loadDB():
+  global db
+  global db_filename
+  try:
+    with open(db_filename, 'rb') as fhandle:
+      db = pickle.load(fhandle)
+  except:
+    pass
+
+def showTitle():
+  global handle
+  global db
+  fullname = db["users"][handle]["fullname"]
+  callsign = db["users"][handle]["callsign"]
+  who = "By MeaTLoTioN, v" + version
+  title = "Amateur Radio Log Book"
+  writeln('|CR|11' + title.center(79))
+  writeln('|03' + who.center(79) + '|15')
+  writeln('|07')
+  if handle in db["users"] :
+    footer1 = "|02Handle: |10"+handle+" |05// |02Full name: |10"+fullname+" |05// |02Call sign: |10"+callsign+"|07"
+    footer2 = ""
+    footer3 = ""
+    writeln(footer1.center(79+27))
+    footerboth = footer2 + ' ' + footer3
+    #writeln(footerboth.center(103))
+
+def init():
+  write('|CL')
+  showTitle()
+  writeln(" "+"="*78)
+
+def mainMenu():
+  init()
+  finished = "no"
+  opts = {
+    '1': 'View your logbook entries',
+    '2': 'Add a logbook entry',
+    '3': 'Delete a logbook entry',
+    'C': 'Change your user config',
+    'D': 'Download your entire log (CSV)',
+    'Q': 'Quit back to the BBS'
+  }
+  
+  writeln("")
+  writeln("")
+  writeln("")
+
+  for opt in sorted(opts):
+    ind = " ".ljust(21)
+    writeln(ind + '|14' + opt.ljust(5) + '|11' + opts[opt].ljust(10))
+  
+  writeln("")
+  #writeln(str(db))
+  #writeln(str(cfg))
+  write(ind + "|15Choose: ")
+
+  ch = onekey(chr(13) + '123CDQ', False)
+  write("|CR")
+
+  if ch == 'Q':
+    finished = "yes"
+  if ch == '1':
+    viewLogBook()
+  if ch == '2':
+    addLogBook()
+  if ch == '3':
+    delLogBook()
+  if ch == 'C':
+    ind = " ".ljust(15)
+    writeln("")
+    write(ind+"|12Are you sure |07you wish to edit your config (Y/N)? ")
+    check = onekey(chr(13) + 'YN', False)
+    if check == 'Y':
+      checkConfig("RESET")
+  if ch == 'D':
+    exportLogBook()
+
+  return finished
+
+def isNull() :
+  writeln("|04No input|13. |12Aborted|07|CR|PA")
+  return False
+
+def addLogBook() :
+  global db
+  global handle
+  #writeln(str(db))
+  #writeln("|PA")
+  ts = calendar.timegm(time.gmtime())
+  now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+  writeln("|CL")
+
+  write("Enter the date for this log entry (YYYY-MM-DD HH:MM:SS): ")
+  getDate = getstr(1,20,20,now)
+  if not getDate :
+    return isNull()
+
+  write("Enter the call-sign of the person you made contact with: ")
+  getCall = getstr(2,10,10,"")
+  if not getCall :
+    return isNull()
+
+  write("\nEnter the observed signal IN from "+getCall+" in RST format where;\nR: 1=Unreadable to 5=Perfect\nS: 1=Faint to 9=Very Strong\nT: 1=Very rough to 9=Perfect (Example: 599): ")
+  getInSig = getstr(10,3,3,"")
+  if not getInSig :
+    return isNull()
+
+  write("\nEnter the reported signal OUT to "+getCall+" in RST format where\nR: 1=Unreadable to 5=Perfect\nS: 1=Faint to 9=Very Strong\nT: 1=Very rough to 9=Perfect (Example: 599): ")
+  getOutSig = getstr(10,3,3,"")
+  if not getOutSig :
+    return isNull()
+
+  write("\nEnter "+getCall+"'s full name is it was given: ")
+  getName = getstr(3,20,20,"")
+  if not getName :
+    return isNull()
+
+  write("\nEnter any notes for this contact: ")
+  getNotes = getstr(1,40,255,"")
+  if not getNotes :
+    return isNull()
+
+  writeln("|CLHere's what you put:")
+  writeln("")
+  writeln("   Date of this contact: "+getDate)
+  writeln("    Contact's CALL-SIGN: "+getCall)
+  writeln(" Contact's observed RST: "+getInSig)
+  writeln("      Your observed RST: "+getOutSig)
+  writeln("    Contact's full name: "+getName)
+  writeln("")
+  writeln("Notes:")
+  writeln(getNotes)
+  writeln("")
+  write("Is the above correct? (Y/N): ")
+  ch = onekey(chr(13) + 'YN', False)
+  write("|CR")
+
+  if ch == 'Y' :
+    db["logs"][getDate] = {}
+    db["logs"][getDate]["reportedBy"] = handle
+    db["logs"][getDate]["contactCall"] = getCall
+    db["logs"][getDate]["observedSig"] = getInSig
+    db["logs"][getDate]["yourSig"] = getOutSig
+    db["logs"][getDate]["theirName"] = getName
+    db["logs"][getDate]["notes"] = getNotes
+    saveDB()
+
+  if ch == 'N' :
+    writeln("Aborted")
+    writeln("|PA")
+
+
+def delLogBook() :
+  global db
+  global handle
+  tmpDB = []
+  found = False
+  writeln("|CL")
+  for LOG in sorted(db["logs"], reverse=True) :
+    if db["logs"][LOG]["reportedBy"] == handle :
+      found = True
+      tmpDB.append(LOG)
+  if found :
+    L = len(tmpDB)
+    for I in range(L) :
+      writeln("["+str(I+1)+"] "+tmpDB[I])
+    write("|CREnter the number of the entry to delete: ")
+    getDate = getstr(1,16,16,"")
+    try:
+      if getDate :
+        NUM = int(getDate) - 1
+        if tmpDB[NUM] in db["logs"] :
+          del db["logs"][tmpDB[NUM]]
+          saveDB()
+          writeln("Deleted: "+getDate)
+          writeln("|PA")
+        else :
+          writeln("No log entry with that date, please check and try again.")
+          writeln("|PA")
+    except:
+      writeln("You entered invalid data, aborted!")
+      writeln("|PA")
+  else:
+    writeln("")
+    writeln("No records to delete. Aborted.".center(71))
+    gotoxy(1,23)
+    writeln("|PA")
+
+
+def viewLogBook() :
+  global db
+  global handle
+  secLevel = mci2str('SL')
+  filter = handle
+  notesOrName = "Notes"
+  if secLevel == "255" :
+    gotoxy(22,19)
+    write("View [A]ll or [S]elf only: ")
+    ch = onekey(chr(13) + 'AS', False)
+    if ch == "S" :
+      pass
+      write("SELF")
+    if ch == "A" :
+      filter = "all"
+      notesOrName = "ReportedBy"
+      write("ALL")
+
+  found = False
+  num = 0
+
+  writeln("|CL|CR")
+  writeln(" "+LCYN+"Date".ljust(20)+LGRN+"Callsign".ljust(10)+LYEL+"Name".ljust(20)+LBLU+"RST IN".ljust(8)+LMAG+"RST OUT".ljust(8)+LGRY+notesOrName.ljust(12))
+  writeln(" "+LBLK+"="*78+DGRY)
+  for LOG in sorted(db["logs"], reverse=True) :
+    if (filter == "all") or (db["logs"][LOG]["reportedBy"] == handle) :
+      found = True
+      num += 1
+      if num % 2 == 0 :
+        BG = BBLU
+      else :
+        BG = BBLK
+      contactCall = str(db["logs"][LOG]["contactCall"])
+      observedSig = str(db["logs"][LOG]["observedSig"])
+      yourSig = str(db["logs"][LOG]["yourSig"])
+      theirName = str(db["logs"][LOG]["theirName"])
+      notes = str(db["logs"][LOG]["notes"])
+
+      if notes :
+        notesAvailable = "Available"
+      else :
+        notesAvailable = "N/A"
+
+      if filter == "all" :
+        writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+db["logs"][LOG]["reportedBy"].ljust(12)+BBLK)
+      else :
+        writeln(BG+" "+LCYN+LOG.ljust(20)+LGRN+contactCall.ljust(10)+LYEL+theirName.ljust(20)+LBLU+observedSig.center(8)+LMAG+yourSig.center(8)+LGRY+notesAvailable.ljust(12)+BBLK)
+  writeln("")
+  #writeln(str(db["logs"]))
+  if not found :
+    writeln(" No log entries added yet|CR")
+  gotoxy(1,23)
+  writeln("|PA")    
+
+def exportLogBook() :
+  global db
+  global handle
+  secLevel = mci2str('SL')
+  filter = handle
+  who = ""
+  if secLevel == "255" :
+    gotoxy(22,19)
+    write("View [A]ll or [S]elf only: ")
+    ch = onekey(chr(13) + 'AS', False)
+    if ch == "S" :
+      pass
+      write("SELF")
+    if ch == "A" :
+      filter = "all"
+      who = "ReportedBy,"
+      write("ALL")
+
+
+  callsign = db["users"][handle]["callsign"]
+  tempFile = script_path+"/"+"mL-ham_logbook_"+callsign.lower()+".csv"
+  fHandle = open(tempFile, "w")
+  fHandle.write(who+"Date,Callsign,Name,RST IN,RST OUT,Notes\n")
+  found = False
+
+  for LOG in sorted(db["logs"], reverse=False) :
+    if (filter == "all") or (db["logs"][LOG]["reportedBy"] == handle) :
+      found = True
+      reportedBy = str(db["logs"][LOG]["reportedBy"])
+      contactCall = str(db["logs"][LOG]["contactCall"])
+      observedSig = str(db["logs"][LOG]["observedSig"])
+      yourSig = str(db["logs"][LOG]["yourSig"])
+      theirName = str(db["logs"][LOG]["theirName"])
+      notes = str(db["logs"][LOG]["notes"])
+      if who != "" :
+        showWho = reportedBy+","
+      else :
+        showWho = ""
+      fHandle.write(showWho+LOG+","+contactCall+","+theirName+" "+observedSig+","+yourSig+","+notes+"\n")
+  fHandle.close()
+
+  if found :
+    menucmd('F3',tempFile)
+    writeln("|15File exported|07")
+    writeln("|PA")
+  else :
+    writeln("|15Sorry, no records to export. Aborted.|07")
+    writeln("|PA")
+
+  os.remove(tempFile)
+      
+
+def checkConfig(S = None) :
+  global db
+  global isAborted
+  if handle not in db["users"] :
+    writeln("|CLDo you have an Amateur Radio Licence and Call-sign? (Y/N)")
+    ch = onekey(chr(13) + 'YN', False)
+    if ch == 'N' :
+      isAborted = True
+
+  if S :
+    if S.upper() == "RESET" :
+      if handle in db["users"] :
+        del db["users"][handle]
+        cStatus = "|CL|07Reconfiguring your details now."
+  else:
+    cStatus = "|CL|07You haven't yet configured your details, lets walk through them now."
+
+  if not isAborted :
+    if handle not in db["users"] :
+      db["users"][handle] = {}
+      isok = False
+      while not isok :
+        writeln(cStatus)
+        writeln("")
+        gotoxy(1,3)
+        write("What is your Amateur Radio call sign: ")
+        gotoxy(39,3)
+        callsign = getstr(2,40,45,"")
+        if callsign :
+          writeln("You chose |10"+callsign+"|07, is this ok? (y/n)")
+          ch = onekey(chr(13) + 'YN', False)
+          if ch == 'Y' :
+            db["users"][handle]["callsign"] = callsign
+            isok = True
+          if ch == 'N' :
+            pass
+        else :
+          pass
+  
+      isok = False
+      while not isok :
+        gotoxy(1,6)
+        write("What is your Full Name: ")
+        gotoxy(25,6)
+        # getstr(mode,width_vis,length_var,default)
+        fullname = getstr(1,40,45,"")
+        if fullname :
+          writeln("You chose |10"+fullname+"|07, is this ok? (y/n)")
+          ch = onekey(chr(13) + 'YN', False)
+          if ch == 'Y' :
+            db["users"][handle]["fullname"] = fullname
+            isok = True
+          if ch == 'N' :
+            pass
+        else :
+          pass
+  
+    saveDB()
+
+## start main program    
+loadDB()
+checkConfig()
+if not isAborted :
+  showTitle()
+  
+  ## main loop
+  while canexit == "no":
+    canexit = mainMenu()
+  

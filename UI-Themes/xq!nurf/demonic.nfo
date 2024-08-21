@@ -1,0 +1,136 @@
+                                                              /\
+                                                          ___/  \___
+_______________________                                  //__ o0 ___\_________
+\_______         _____/_______________        _____________/__/\__\   /_______\
+  //   /    /   ___/__\______        /________\________    /____\    //    /jp
+ /    /    /   /            /  /    //  _________/   /    //    /   '     /
+/_________//__________/    /  /    /    //    /     /    /_____/_________/
+ dEMONIC pRODUCTIONZ /____/__//____    /     ______//___/ rELEASE iNFORMATION!
++-------------------------------- \_________/ --------------------------------+
+| +-----------------------<< release information >>-------------------------+ |
+| | release name   : Mystic New User Registation Form                       | |
+| | release date   : March 2023                                             | |
+| | completion date:                                                        | |
+| | coder/modder   : xqtr 0f Another Droid BBS / andr01d.zapto.org:9999     | |
+| | coded with     : Geany (text editor) and much love...                   | |
+| | artist         : xqtr, jp                                               | |
+: | courier        :                                                        | :
+. | packaged by    : xqtr                                                   | :
+  +-------------------------------------------------------------------------+ .
+
+ -+--------------------------<< release type >>-----------------------------+-
+  |                                                                         | .
+  |     [#] original source code [ ] old source code [ ] source scraps      | .
+: |       [ ] coding/modding tips/tutorial [ ] misc util [ ] bbs util       |
+  |  [ ] art collection [ ] bbs door [#] bbs mod [ ] demo [ ] coding util   |
+  |                                                                         |
+ -+-------------------------------------------------------------------------+-
+
+ -+-------------------------<< source code in >>----------------------------+-
+  |                                                                         |
+  |   [ ] ppe [ ] pascal [ ] c [ ] ipl [ ] basic [#] mpl [ ] isl [ ] xxx    |
+  |                                                                         |
+ -+-------------------------------------------------------------------------+-
+
+ -+------------------------<< software of bbs >>----------------------------+-
+  |                                                                         |
+  |  [ ] impulse [ ] system/x [ ] pcx [ ] iniquity [ ] pcboard [ ] obv/2    |
+  |  [ ] pipeline [ ] desire [ ] renegade [ ] itc [ ] illusion [#] mystic   |
+. |      [ ] not listed: _____________________________________________      |
+  |      [ ] universal door for: ___________________________ dropfiles      | :
+  |                                                                         |
+ -+-------------------------------------------------------------------------+-
+
+ -+----------------------------<< comments >>-------------------------------+-
+  |                                                                         |
+  |  a cool registration form for new users, applying to your BBS. it looks |
+  | like the old style group/pack registration forms and is inspired by one |
+  | that jp (jack plash of demonic) made, back in the day, for Demonic      |
+  | group. it has the same appearance and style and is even better :)       |
+  |                                                                         |
+  | although you may found that is asking for a lot of information, only    |
+  | the basic handle, password, email, are needed to complete the registra- |
+  | tion. everything else are optional and the visitor can decide if he     |
+  | wants to share the additional information.                              |
+  |                                                                         |
+  | after the registration is complete, the basic info is saved in Mystic   |
+  | and all other optional info, is saved in a text file, in a folder of    |
+  | your choosing. you can then decide what to do with that info, like      |
+  | keeping an archiving or sharing it in the BBS and stuff. you could even |
+  | use it as a registration form for your new group ;)                     |
+  |                                                                         |  
+ -+-------------------------------------------------------------------------+-
+
+:-+--------------------------<< installation >>-----------------------------+-
+  |                                                                         | :
+  | :// if you are a beginner, unpack the archive in a temp folder. you     |
+  |     will see many files and two folders. read/open the files and read   |
+  |     them. now continue...                                               |
+  |                                                                         |
+  | :// transfer the files from the ./text folder inside your Mystic text   |
+  |     folder of your theme you are using. if you are using the default    |
+  |     theme, it should be something like:                                 |
+  |                                                                         |
+  |                      ./mystic/themes/default/text                       |
+  |                                                                         |
+. | :// also transfer the files in the ./scripts folder in Mystics script   | .
+  |     folder. for the default theme it would be:                          |
+  |                                                                         |
+  |                     ./mystic/themes/default/scripts                     |
+  |                                                                         |
+  | :// edit the script, change the colors and characters you want to use   |
+  |     and most important change the location for saving the registration  |
+  |     forms, at line 37 in the constant formfolder. it's set to /tmp/     |
+  |     for linux users, but make sure to change it to a more appropriate   |
+  |     location                                                            |
+  |                                                                         |
+  | :// compile the "xqform.mps" file with MPLC. if you don't know how,     |
+  |     RTFM of Mystic BBS, or ask in Zeronet!                              |
+  |                                                                         |
+  | :// rename the xqform.mpx into newuserapp.mpx inside the ./scripts      |
+  |     folder. and you are ready!                                          |
+. |                                                                         | .
+  |                                                                         |
+ -+-------------------------------------------------------------------------+-
+ 
+ -+----------------------------<< configure >>------------------------------+-
+  |                                                                         |
+  |  as all of my mods, you are free to custiomize it as you like! you have |
+  | to edit the main script to do that, but is easy enough.                 |
+  |                                                                         |
+  | in lines 35 to 37, set the max tries before disconnecting the user and  |
+  | the folder to save the additional user information.                     |
+  |                                                                         |
+  | in lines 72 to 122 you can change colors, answer types, text and stuff. | .
+  | don't fear modding. keep backups and play with the variables and code!  |
+. |                                                                         |
+  | at the end of each field, you will notice an "ending" character. if     |
+  | that is not displayed correctly, it's because of character encoding     |
+  | thing. to solve it do this...                                           | :
+  |                                                                         |
+  | at line 75 you will see this:                                           |
+  |    echar :char = '·'; //''; //chr(250);                              |
+  |                   ^       ^         ^                                   | .
+  |                   UTF8    ASCii     ASCII                               |
+. | chose the one that is best for your system/bbs and remove the others.   |
+  | don't forget to compile the script ;)                                   |
+  |                                                                         |
+ -+-------------------------------------------------------------------------+-
+ 
+ 
+ echar :char = '·'; //''; //chr(151);
+ 
+
+: +-----------------------<< additional comments >>-------------------------+-
+  |                                                                         |
+  | this mod is inspired by a DOS registration app. from JP, so all credits | :
+. | should be given to him. i just transferred the idea to Mystic/BBS.      |
+: |                                                                         | .
+| |                                                                         | :
+| | ...as always, keep BBSing! text mode is a choice and way of living!     | |
+| |                                                                         | |
+| +-------------------------------------------------------------------------+ |
++-----------------------------------------------------------------------------+
+|  template by jack phlash // 1998 - demonic productions (c) www.demonic.net  |
+:                                                                             :
+.                                                                             .

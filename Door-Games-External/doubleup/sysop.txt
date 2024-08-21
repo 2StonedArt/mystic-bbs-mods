@@ -1,0 +1,71 @@
+                                 Double-Up!
+                              for mystic 1.10a36+
+                               by Darryl Perry 
+Software --------------------------------------------------------------------
+       [ ] PCB PPe      [ ] OBV          [ ] VGA         [ ] OTHER___________
+       [ ] Renegade     [ ] Iiniquity    [ ] ASCII       [ ] HTML/CGI/WWW    
+       [x] Mystic       [ ] WWVI         [ ] Telegard    [x] MPL
+       [ ] ANSI         [ ] TEXT
+OS --------------------------------------------------------------------------
+              [x] dos  [ ] os/2  [x] windows [x] Win32 [x] *nix
+Type ------------------------------------------------------------------------
+                infoform [ ]   utility [ ]  misc [ ]  door [X]
+Disclaimer-------------------------------------------------------------------
+
+   The author has taken every precaution to insure that no harm or damage
+will occur on computer systems operating this util.  Never the less, the
+author will NOT be held liable for whatever may happen on your computer
+system or to any computer systems which connects to your own as a result of
+operating this util.  The user assumes full responsibility for the correct
+operation of this software package, whether harm or damage results from
+software error, hardware malfunction, or operator error.  NO warranties are
+offered, expressly stated or implied, including without limitation or
+restriction any warranties of operation for a particular purpose and/or
+merchant ability.  If you do not agree with this then do NOT use this
+program.
+
+Double-Up! Description---------------------------------------------------------
+
+  Double-Up! is a Mystic MPL version of the 2048 puzzle game.
+
+  On the 4x4 grid, move the numbered tiles Up, Down, Left, or Right.  The
+  tiles slide over and if two matching numbered tiles touch, they Double-Up!
+  into one tile.
+
+
++ Features include:
+  
+  o Fully functional - no registration required
+  o source code included
+  o Multi-Player leader board - Get the high score!
+
+
+
+NOTE!!! This app requires Mystic BBS v1.10a36 or later.
+
+
+Double-Up! MPL Intallation-----------------------------------------------------
+
+o Place the doubleup.mps in the Mystic SCRIPTS directory and then compile with 
+  mplc or mide.
+
+o Add Double-Up! to your desired menu.  The Mystic menu type is GX for running 
+  a script. There is only one optional parameter. Add the path and filename
+  of the top ten scores file.
+
+Type: GX
+Data: doubleup [/path/to/desired/textfile/dir/filename.ext]
+
+Bug Fixes/History-------------------------------------------------------------
+
+Version 1.0 is the first release.  
+
+Bug Reports-----------------------------------------------------------------
+
+If you want to send me bug report or a note telling me how much you like it,
+please feel free to do so.
+
+Cyberia BBS web page (http://cyberia.darktech.org:8080)
+Email me at dperry.geo@yahoo.com
+Telnet to telnet://cyberia.darktech.org
+
