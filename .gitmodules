@@ -1,0 +1,15 @@
+[submodule "MysticBBS-MultiTool"]
+	path = MysticBBS-MultiTool
+	url = https://github.com/DRPanther/MysticBBS-MultiTool.git
+[submodule "mystic_rss"]
+	path = mystic_rss
+	url = https://github.com/maranas/mystic_rss.git
+[submodule "mysticbbs-vbase"]
+	path = mysticbbs-vbase
+	url = https://github.com/opicron/mysticbbs-vbase.git
+[submodule "pyjam"]
+	path = pyjam
+	url = https://github.com/mtatton/pyjam.git
+[submodule "MysticBBS-QWK"]
+	path = MysticBBS-QWK
+	url = https://github.com/DRPanther/MysticBBS-QWK.git
