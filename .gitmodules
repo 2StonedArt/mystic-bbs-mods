@@ -13,3 +13,87 @@
 [submodule "MysticBBS-QWK"]
 	path = MysticBBS-QWK
 	url = https://github.com/DRPanther/MysticBBS-QWK.git
+[submodule "xqbbsdb"]
+	path = xqbbsdb
+	url = https://github.com/xqtr/xqbbsdb.git
+[submodule "RCS_Node_Poll"]
+	path = RCS_Node_Poll
+	url = https://github.com/DRPanther/RCS_Node_Poll.git
+[submodule "mystic-one-liner-util"]
+	path = mystic-one-liner-util
+	url = https://github.com/richorr/mystic-one-liner-util.git
+[submodule "mysticbbs_tweet"]
+	path = mysticbbs_tweet
+	url = https://github.com/gm1ymi/mysticbbs_tweet.git
+[submodule "MTAFile"]
+	path = MTAFile
+	url = https://github.com/DRPanther/MTAFile.git
+[submodule "JAMTools"]
+	path = JAMTools
+	url = https://github.com/xqtr/JAMTools.git
+[submodule "mystic_userstats"]
+	path = mystic_userstats
+	url = https://github.com/DRPanther/mystic_userstats.git
+[submodule "Mystic_BBS_Theme-Hacker_666"]
+	path = Mystic_BBS_Theme-Hacker_666
+	url = https://github.com/pgousdal/Mystic_BBS_Theme-Hacker_666.git
+[submodule "MyGUI-MysticBBS"]
+	path = MyGUI-MysticBBS
+	url = https://github.com/OwenEvers/MyGUI-MysticBBS.git
+[submodule "gfiles"]
+	path = gfiles
+	url = https://github.com/Gryphon324/gfiles.git
+[submodule "mphys"]
+	path = mphys
+	url = https://github.com/mtatton/mphys.git
+[submodule "mysqik"]
+	path = mysqik
+	url = https://github.com/mtatton/myswik.git
+[submodule "mysbib"]
+	path = mysbib
+	url = https://github.com/mtatton/mysbib.git
+[submodule "hamsearch"]
+	path = hamsearch
+	url = https://github.com/mobbyg/hamsearch.git
+[submodule "msalph"]
+	path = msalph
+	url = https://github.com/mtatton/msalph.git
+[submodule "zenpho"]
+	path = zenpho
+	url = https://github.com/mtatton/zenpho.git
+[submodule "P1XArion-BBS"]
+	path = P1XArion-BBS
+	url = https://github.com/w84death/P1XArion-BBS.git
+[submodule "mysticbbs-webbrowser"]
+	path = mysticbbs-webbrowser
+	url = https://github.com/y4my4my4m/mysticbbs-webbrowser.git
+[submodule "doubleup"]
+	path = doubleup
+	url = https://github.com/Gryphon324/doubleup.git
+[submodule "mL-ham_logbook"]
+	path = mL-ham_logbook
+	url = https://github.com/christiansacks/mL-ham_logbook.git
+[submodule "mystic-kill-script"]
+	path = mystic-kill-script
+	url = https://github.com/opicron/mystic-kill-script.git
+[submodule "RCS_TriviaPost"]
+	path = RCS_TriviaPost
+	url = https://github.com/DRPanther/RCS_TriviaPost.git
+[submodule "RCSMysticCountryCount"]
+	path = RCSMysticCountryCount
+	url = https://github.com/DRPanther/RCSMysticCountryCount.git
+[submodule "ml-aslu"]
+	path = ml-aslu
+	url = https://github.com/christiansacks/ml-aslu.git
+[submodule "number-guess"]
+	path = number-guess
+	url = https://github.com/DRPanther/number-guess.git
+[submodule "Crazy_Eights_Slots"]
+	path = Crazy_Eights_Slots
+	url = https://github.com/DRPanther/Crazy_Eights_Slots.git
+[submodule "IdleBallz"]
+	path = IdleBallz
+	url = https://github.com/DRPanther/IdleBallz.git
+[submodule "pycrt"]
+	path = pycrt
+	url = https://github.com/xqtr/pycrt.git
